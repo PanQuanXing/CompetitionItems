@@ -1,17 +1,17 @@
 #include "STC89C5X.h"
 #include "intrins.h"
 #include "panquanxing.h"
-sbit T_STR = P0^5;       //Ëø´æÒı½Å£¬ÆÁÉÏ±êÊ¶Î»STR
-sbit R1    = P0^4;       //Êı¾İÒı½Å£¬ÆÁÉÏ±êÊ¶R1
-sbit T_CLK = P0^6;       //Ê±ÖÓÒı½Å£¬ÆÁÉÏ±êÊ¶Î»CLK
-sbit OE    = P0^7;       //Ê¹ÄÜÒı½Å£¬ÆÁÉÏ±êÊ¶EN/OE
+sbit T_STR = P0^5;       //é”å­˜å¼•è„šï¼Œå±ä¸Šæ ‡è¯†ä½STR
+sbit R1    = P0^4;       //æ•°æ®å¼•è„šï¼Œå±ä¸Šæ ‡è¯†R1
+sbit T_CLK = P0^6;       //æ—¶é’Ÿå¼•è„šï¼Œå±ä¸Šæ ‡è¯†ä½CLK
+sbit OE    = P0^7;       //ä½¿èƒ½å¼•è„šï¼Œå±ä¸Šæ ‡è¯†EN/OE
 unsigned char isEven;
-unsigned int startAddr=0;//ÓÃÀ´±£´æ³õÊ¼µØÖ·µÄ
-unsigned int inputCount=0;//±£´æÀ¶ÑÀÊäÈëµÄ×Ö·ûµÄ¸öÊı
-unsigned char wordCount=0;//±£´æÔÚeepromÖĞµÄ×Ö·ûµÄ¸öÊı
+unsigned int startAddr=0;//ç”¨æ¥ä¿å­˜åˆå§‹åœ°å€çš„
+unsigned int inputCount=0;//ä¿å­˜è“ç‰™è¾“å…¥çš„å­—ç¬¦çš„ä¸ªæ•°
+unsigned char wordCount=0;//ä¿å­˜åœ¨eepromä¸­çš„å­—ç¬¦çš„ä¸ªæ•°
 
-unsigned char MoveBitNum,MoveBitNumtemp,IncNum;//ÒÆ¶¯Î»Êı,ÁÙÊ±ÒÆ¶¯Î»Êı£¬´óÓÚÒ»¸ö×Ö½ÚÔö¼Ó×Ö½ÚÊı
-unsigned char HzNum;//ºº×Ö¸öÊı
+unsigned char MoveBitNum,MoveBitNumtemp,IncNum;//ç§»åŠ¨ä½æ•°,ä¸´æ—¶ç§»åŠ¨ä½æ•°ï¼Œå¤§äºä¸€ä¸ªå­—èŠ‚å¢åŠ å­—èŠ‚æ•°
+unsigned char HzNum;//æ±‰å­—ä¸ªæ•°
 unsigned char buff[10]={0};
 
 unsigned int offset1=0,offset2=0,offset3=0;
@@ -26,18 +26,18 @@ uchar myReadLastDataOnSector();
 void EEPROM_Init_Zero(uint);
 void main(void){
 	
-	uchar count;//16ĞĞÉ¨ÃèÊı¾İ£¬·¶Î§0-15
+	uchar count;//16è¡Œæ‰«ææ•°æ®ï¼ŒèŒƒå›´0-15
 	uint i,j;
 	uchar temp;
 
-	//ÉèÖÃÀ¶ÑÀ½ÓÊÕ²¨ÌØÂÊÎª9600Hz@22.1184MHz
+	//è®¾ç½®è“ç‰™æ¥æ”¶æ³¢ç‰¹ç‡ä¸º9600Hz@22.1184MHz
 	TMOD&=0x0f;
-	TMOD|=0x20;//ÉèÖÃTMODÎª0x20
+	TMOD|=0x20;//è®¾ç½®TMODä¸º0x20
 	TH1=0xfa;
 	TL1=0xfa;
 	SCON=0x70;
-	ET1=0;//½ûÖ¹¶¨Ê±Æ÷1µÄÖĞ¶Ï
-	TR1=1;//Æô¶¯¼ÆÊ±Æ÷Ò»¿ªÊ¼¼ÆÊ±
+	ET1=0;//ç¦æ­¢å®šæ—¶å™¨1çš„ä¸­æ–­
+	TR1=1;//å¯åŠ¨è®¡æ—¶å™¨ä¸€å¼€å§‹è®¡æ—¶
 	
 	wordCount=myReadLastDataOnSector();
 	wordCount+=1;
@@ -46,21 +46,21 @@ void main(void){
 	while(1){
 			i++;
 		receiveData();
-		//if(i==20)//¸ü¸ÄÁ÷¶¯ËÙ¶È,1Tµ¥Æ¬»úºÍ12Tµ¥Æ¬»úËÙ¶È´óÔ¼5-8±¶£¬×¢Òâ¸ü¸Ä²ÎÊı
+		//if(i==20)//æ›´æ”¹æµåŠ¨é€Ÿåº¦,1Tå•ç‰‡æœºå’Œ12Tå•ç‰‡æœºé€Ÿåº¦å¤§çº¦5-8å€ï¼Œæ³¨æ„æ›´æ”¹å‚æ•°
 		if(i==40)
 		{
 			i=0;
 			MoveBitNum++;
-			if(MoveBitNum==16)//Ã¿´ÎÒÆ¶¯ÍêÒ»¸öºº×Ö´óĞ¡ºóÑ­»·
+			if(MoveBitNum==16)//æ¯æ¬¡ç§»åŠ¨å®Œä¸€ä¸ªæ±‰å­—å¤§å°åå¾ªç¯
 			{
 					MoveBitNum=0;
-					HzNum+=1;    //µ÷ÓÃÏÂÒ»¸öºº×Ö
-					if(HzNum>=wordCount+4)//ĞèÒªÏÔÊ¾µÄºº×Ö¸öÊı£¬°üÀ¨Ç°ÃæµÄÒ»ÆÁ¿Õ×Ö·ûµÄ¸öÊı£¬ºóÃæÇåÆÁµÄ¿Õ×Ö·û²»°üº¬ÔÚÄÚ,ÕâÀïÊÇ(ºº×Ö¸öÊı+4)
-						 HzNum=0;   //ÍêÈ«ÏÔÊ¾ÍêºóÑ­»·µ÷ÓÃ
+					HzNum+=1;    //è°ƒç”¨ä¸‹ä¸€ä¸ªæ±‰å­—
+					if(HzNum>=wordCount+4)//éœ€è¦æ˜¾ç¤ºçš„æ±‰å­—ä¸ªæ•°ï¼ŒåŒ…æ‹¬å‰é¢çš„ä¸€å±ç©ºå­—ç¬¦çš„ä¸ªæ•°ï¼Œåé¢æ¸…å±çš„ç©ºå­—ç¬¦ä¸åŒ…å«åœ¨å†…,è¿™é‡Œæ˜¯(æ±‰å­—ä¸ªæ•°+4)
+						 HzNum=0;   //å®Œå…¨æ˜¾ç¤ºå®Œåå¾ªç¯è°ƒç”¨
 			}
 		}
 
-		//delay(1);//¿ØÖÆÉ¨ÃèÆµÂÊ
+		//delay(1);//æ§åˆ¶æ‰«æé¢‘ç‡
 		
 		offset1=HzNum;
 		offset1<<=5;
@@ -72,8 +72,8 @@ void main(void){
 		wordCountBounder<<=5;
 		wordCountBounder+=0x0080;
 		
-		for(j=0;j<5;j++) //È¡Ã¿¸öºº×ÖµÄÇ°2¸ö×Ö½Ú£¬4¸öºº×Ö×é³ÉÒ»ĞĞ£¬Êı¾İ´«ÊäÍê³ÉºóËø´æÊä³ö¼´¿É£¬ÕâÀïĞèÒª¶àÈ¡³öÒ»¸öºº×Ö×÷Îª»º³å
-		{                //Ô­À´j=4£¬ÏÖÔÚj=5.
+		for(j=0;j<5;j++) //å–æ¯ä¸ªæ±‰å­—çš„å‰2ä¸ªå­—èŠ‚ï¼Œ4ä¸ªæ±‰å­—ç»„æˆä¸€è¡Œï¼Œæ•°æ®ä¼ è¾“å®Œæˆåé”å­˜è¾“å‡ºå³å¯ï¼Œè¿™é‡Œéœ€è¦å¤šå–å‡ºä¸€ä¸ªæ±‰å­—ä½œä¸ºç¼“å†²
+		{                //åŸæ¥j=4ï¼Œç°åœ¨j=5.
 
 			offset3=j;
 			offset3<<=5;
@@ -93,23 +93,23 @@ void main(void){
 				buff[j+j+1]=EEPROM_ReadByte(0x2200+numCount2-0x0080);
 			}
 		}
-		if(MoveBitNum<8)                   //  ÅĞ¶ÁÒÆ¶¯¾àÀëÊÇ´óÓÚÒ»¸ö×Ö½Ú»¹ÊÇĞ¡ÓÚÒ»¸ö×Ö½Ú£¬ÒòÎªÒ»¸ö×Ö½Ú×óÒÆÓÒÒÆ×î´óÖ»ÄÜ8Î»
+		if(MoveBitNum<8)                   //  åˆ¤è¯»ç§»åŠ¨è·ç¦»æ˜¯å¤§äºä¸€ä¸ªå­—èŠ‚è¿˜æ˜¯å°äºä¸€ä¸ªå­—èŠ‚ï¼Œå› ä¸ºä¸€ä¸ªå­—èŠ‚å·¦ç§»å³ç§»æœ€å¤§åªèƒ½8ä½
 		{ 
 			IncNum=0;
 			MoveBitNumtemp=MoveBitNum; 
 		}else{ 
 			IncNum=1; 
-			MoveBitNumtemp=MoveBitNum-8;//´óÓÚ8¾Í¼õÈ¥8µÃµ½µÄÊıÖµ»¹ÊÇĞ¡ÓÚ8
+			MoveBitNumtemp=MoveBitNum-8;//å¤§äº8å°±å‡å»8å¾—åˆ°çš„æ•°å€¼è¿˜æ˜¯å°äº8
 		}
-		T_STR=0;       //Ëø´æÎŞĞ§
-		for(j=0;j<8;j++)          //°´bitµÄ·½Ê½ÒÆ¶¯»º³åÇøµÄÄÚÈİ£¬È»ºóÊä³öµ½595£¬¼´È¡³öµÄÊıÖµÃ¿¸ö×Ö½Ú×óÒÆÒ»¶¨µÄÎ»Êı£¬
-		{                                     //ºóÃæ×óÒÆ³öµÄÊı¾İÕûºÏµ½Ç°ÃæµÄ×Ö½ÚÖĞ£¬±£³ÖÊı¾İµÄÁ¬ĞøĞÔ	     
-			temp=(buff[j+IncNum]>>MoveBitNumtemp)|(buff[j+1+IncNum]<<(8-MoveBitNumtemp));//Õâ¾ä±È½ÏÖØÒª£¬ĞèÒª×ÔĞĞÄÃ³ö2¸ö×Ö½ÚµÄÊı¾İÄ£Äâ·ÖÎö
-			InputByte(temp);//Êä³öµ½595
-		}//8¸ö×Ö½Ú´«ÊäÍêËø´æÊä³ö
+		T_STR=0;       //é”å­˜æ— æ•ˆ
+		for(j=0;j<8;j++)          //æŒ‰bitçš„æ–¹å¼ç§»åŠ¨ç¼“å†²åŒºçš„å†…å®¹ï¼Œç„¶åè¾“å‡ºåˆ°595ï¼Œå³å–å‡ºçš„æ•°å€¼æ¯ä¸ªå­—èŠ‚å·¦ç§»ä¸€å®šçš„ä½æ•°ï¼Œ
+		{                                     //åé¢å·¦ç§»å‡ºçš„æ•°æ®æ•´åˆåˆ°å‰é¢çš„å­—èŠ‚ä¸­ï¼Œä¿æŒæ•°æ®çš„è¿ç»­æ€§	     
+			temp=(buff[j+IncNum]>>MoveBitNumtemp)|(buff[j+1+IncNum]<<(8-MoveBitNumtemp));//è¿™å¥æ¯”è¾ƒé‡è¦ï¼Œéœ€è¦è‡ªè¡Œæ‹¿å‡º2ä¸ªå­—èŠ‚çš„æ•°æ®æ¨¡æ‹Ÿåˆ†æ
+			InputByte(temp);//è¾“å‡ºåˆ°595
+		}//8ä¸ªå­—èŠ‚ä¼ è¾“å®Œé”å­˜è¾“å‡º
 		OE = 1;
-		P0=15-count;//ÓÃP0¿ÚµÄÇ°4Î»¿ØÖÆ16ĞĞ£¬ÆÁÄÚ²¿Í¨¹ı4-16ÒëÂëÆ÷¹¤×÷£¬Ñ­»·É¨Ãè16ĞĞ
-		T_STR=1;      //Ëø´æÓĞĞ§£¬´ËÊ±Ò»ĞĞµÄÊı¾İÏÔÊ¾µ½ÆÁÉÏ
+		P0=15-count;//ç”¨P0å£çš„å‰4ä½æ§åˆ¶16è¡Œï¼Œå±å†…éƒ¨é€šè¿‡4-16è¯‘ç å™¨å·¥ä½œï¼Œå¾ªç¯æ‰«æ16è¡Œ
+		T_STR=1;      //é”å­˜æœ‰æ•ˆï¼Œæ­¤æ—¶ä¸€è¡Œçš„æ•°æ®æ˜¾ç¤ºåˆ°å±ä¸Š
 		OE = 0;
 		count++;
 		if(count==16)
@@ -117,21 +117,21 @@ void main(void){
 	}
 }
 
-//¿ÉÄÜÓÉÓÚ±¾ÈËµÄ¼¼ÊõÎÊÌâ£¬´Ëº¯ÊıÖ»ÄÜ¶¨ÒåÔÚ´Ë£¬¶¨Òåµ½ÁíÍâµÄÎÄ¼ş»áÎŞ·¨Ğ´ÈëEEPROM
+//æ­¤å‡½æ•°åªèƒ½å®šä¹‰åœ¨æ­¤ï¼Œå®šä¹‰åˆ°å¦å¤–çš„æ–‡ä»¶ä¼šæ— æ³•å†™å…¥EEPROM
 void writeNewCheckCount(){	
 	uint sectorOne=0x2000;
 	while(sectorOne<=0x21ff&&EEPROM_ReadByte(sectorOne)!=0xff){
 		++sectorOne;
 	}
-		//ÕâÀï¿ÉÒÔÍ¨¹ı¶øÇÒsectorOne»áÃ¿´Î×ÔÔö1
+		//è¿™é‡Œå¯ä»¥é€šè¿‡è€Œä¸”sectorOneä¼šæ¯æ¬¡è‡ªå¢1
 	if(sectorOne>0x21ff){
 		EEPROM_EraseSector(0x2000);
-		EEPROM_WriteByte(0x2000,SBUF);//ÕâÀïÖ»ÄÜÓÃSBUF,»òÕßÊÇÖ¸Õë,ÒòÎª²ÎÊı±äÁ¿ÔÚ²»Í¬µÄcÎÄ¼ş£¬hÎÄ¼ş²»ÄÜ´«µİÌ«¶à´Î£¬ÈİÒ×Ôì³ÉÎŞ·¨½ÓÊÕµ½±äÁ¿
+		EEPROM_WriteByte(0x2000,SBUF);//è¿™é‡Œåªèƒ½ç”¨SBUF,æˆ–è€…æ˜¯æŒ‡é’ˆ,å› ä¸ºå‚æ•°å˜é‡åœ¨ä¸åŒçš„cæ–‡ä»¶ï¼Œhæ–‡ä»¶ä¸èƒ½ä¼ é€’å¤ªå¤šæ¬¡ï¼Œå®¹æ˜“é€ æˆæ— æ³•æ¥æ”¶åˆ°å˜é‡
 	}else{
 		EEPROM_WriteByte(sectorOne,SBUF);
 	}
 }
-void InputByte(uchar DataR1) //Ğ´Ò»¸ö×Ö½Ú
+void InputByte(uchar DataR1) //å†™ä¸€ä¸ªå­—èŠ‚
 { 
 	uchar i;
 	for(i=8; i>0; i--)
@@ -143,7 +143,7 @@ void InputByte(uchar DataR1) //Ğ´Ò»¸ö×Ö½Ú
 	} 
 }
 
-uchar myReadLastDataOnSector(){//²»ÄÜÔÚÖĞ¶ÏÖĞÊ¹ÓÃ´Ëº¯Êı
+uchar myReadLastDataOnSector(){//ä¸èƒ½åœ¨ä¸­æ–­ä¸­ä½¿ç”¨æ­¤å‡½æ•°
 	uchar checkCount;
 	uint sectorOne=0x2000;
 	while(sectorOne<=0x21ff&&EEPROM_ReadByte(sectorOne)!=0xff){
@@ -159,27 +159,27 @@ uchar myReadLastDataOnSector(){//²»ÄÜÔÚÖĞ¶ÏÖĞÊ¹ÓÃ´Ëº¯Êı
 
 void receiveData(){
 	if(RI&&inputCount==0){
-		startAddr=0x2200;//Êı¾İµÄ
-		writeNewCheckCount();//ÏÈ°Ñ¼ÆÊı±£´æÆğÀ´
-		wordCount=SBUF;//×î¶à96¸ö×Ö·û£¬¼´¿ÉÒÔ×°ÔØ96¸öÓ¢ÎÄ×Ö·û£¬48¸öºº×Ö
-		inputCount=wordCount;//Ã¿¸ö×Ö·û°üº¬16¸ö×Ö½ÚµÄ×ÖÄ£Êı¾İ
+		startAddr=0x2200;//æ•°æ®çš„
+		writeNewCheckCount();//å…ˆæŠŠè®¡æ•°ä¿å­˜èµ·æ¥
+		wordCount=SBUF;//æœ€å¤š96ä¸ªå­—ç¬¦ï¼Œå³å¯ä»¥è£…è½½96ä¸ªè‹±æ–‡å­—ç¬¦ï¼Œ48ä¸ªæ±‰å­—
+		inputCount=wordCount;//æ¯ä¸ªå­—ç¬¦åŒ…å«16ä¸ªå­—èŠ‚çš„å­—æ¨¡æ•°æ®
 		if(wordCount%2){
 			isEven=1;
 		}else{
 			isEven=0;
 		}
 		inputCount<<=4;
-		EEPROM_EraseSector(0x2200);//²Á³ıµÚÈıÉÈÇø
-		EEPROM_EraseSector(0x2400);//²Á³ıµÚËÄÉÈÇø
-		EEPROM_EraseSector(0x2600);//²Á³ıµÚÎåÉÈÇø
-		//ÒòÎªwordCountĞèÒª¸³Öµ¸øinputCount,ËùÒÔÖ»ÄÜ×îºó×ªÎªHzk×Ö·ûÊı
+		EEPROM_EraseSector(0x2200);//æ“¦é™¤ç¬¬ä¸‰æ‰‡åŒº
+		EEPROM_EraseSector(0x2400);//æ“¦é™¤ç¬¬å››æ‰‡åŒº
+		EEPROM_EraseSector(0x2600);//æ“¦é™¤ç¬¬äº”æ‰‡åŒº
+		//å› ä¸ºwordCountéœ€è¦èµ‹å€¼ç»™inputCount,æ‰€ä»¥åªèƒ½æœ€åè½¬ä¸ºHzkå­—ç¬¦æ•°
 		wordCount++;
-		wordCount>>=1;//½«wordCount×ªÎª¶ÔÓÚµÄhzk×Ö·û¸öÊı
+		wordCount>>=1;//å°†wordCountè½¬ä¸ºå¯¹äºçš„hzkå­—ç¬¦ä¸ªæ•°
 		while(inputCount){
 			RI=0;
 			inputCount-=1;
 			while(RI==0);
-			EEPROM_WriteByte(startAddr,SBUF);//Ğ´Êı¾İ£¬Ã¿Ğ´Ò»¸ö×Ö½ÚµØÖ·×ÔÔö1
+			EEPROM_WriteByte(startAddr,SBUF);//å†™æ•°æ®ï¼Œæ¯å†™ä¸€ä¸ªå­—èŠ‚åœ°å€è‡ªå¢1
 			startAddr+=1;
 		}
 	}
