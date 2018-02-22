@@ -1,0 +1,4 @@
+".\Objects\main.obj",
+".\Objects\panquanxing.obj" 
+TO ".\Objects\AndroidBluetooth89c52" 
+PRINT(".\Listings\AndroidBluetooth89c52.m51") RAMSIZE(256) 

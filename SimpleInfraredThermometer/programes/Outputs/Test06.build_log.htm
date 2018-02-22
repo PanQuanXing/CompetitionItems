@@ -1,0 +1,75 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: μVision V5.20.0.39
+Copyright (C) 2016 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: 云星 潘, Microsoft, LIC=AT2Z9-4ULEE-UQN0Q-NQPV7-G19VQ-EWP0G
+ 
+Tool Versions:
+Toolchain:       PK51 Prof. Developers Kit  Version: 9.56.0.0
+Toolchain Path:  D:\Keil_v5\C51\BIN
+C Compiler:      C51.exe V9.56.0.0
+Assembler:       A51.exe V8.2.5.0
+Linker/Locator:  BL51.exe V6.22
+Library Manager: LIB51.exe V4.30.1.0
+Hex Converter:   OH51.exe V2.7.0.0
+CPU DLL:         S8051.DLL V3.106.0.0
+Dialog DLL:      DP51.DLL V2.63.0.0 
+<h2>Project:</h2>
+H:\简易红外体温计\programes\pqxFinally.uvproj
+Project File Date:  06/14/2017
+
+<h2>Output:</h2>
+Rebuild target 'Target 1'
+compiling PqxDelay.c...
+compiling PqxMLX90614.c...
+compiling PqxKeys.c...
+compiling PqxFont.c...
+compiling PqxMenus.c...
+compiling panquanxing.c...
+compiling OLED12832.c...
+compiling taskStart.c...
+compiling taskKeys.c...
+compiling taskMLX90614.c...
+compiling taskEEPROM.c...
+assembling Conf_tny.A51...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY_US?PQXDELAY
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DATA2TEMPK?PQXMLX90614
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_UPACTION?PQXMENUS
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DOWNACTION?PQXMENUS
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?OLED_FULL?OLED12832
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?OLED_ON?OLED12832
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?OLED_OFF?OLED12832
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_OLED12832SHOWBYTE?OLED12832
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?CO?TASKKEYS
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?CO?TASKMLX90614
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?CO?TASKEEPROM
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?_TEMPC2DATA?PQXMLX90614
+    CALLER1: ?PR?DETECTTEMP?TASKMLX90614
+    CALLER2: ?PR?SAVE2EEPROM?TASKEEPROM
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?_DATA2TEMPC?PQXMLX90614
+    CALLER1: ?PR?DETECTTEMP?TASKMLX90614
+    CALLER2: ?PR?READ2EEPROM?TASKEEPROM
+Program Size: data=42.2 xdata=185 code=12736
+creating hex file from ".\Outputs\Test06"...
+".\Outputs\Test06" - 0 Error(s), 13 Warning(s).
+Build Time Elapsed:  00:00:06
+</pre>
+</body>
+</html>

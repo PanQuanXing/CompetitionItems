@@ -1,0 +1,1 @@
+"USER\taskMenus.c" LARGE OPTIMIZE (8,SPEED) BROWSE INCDIR(.\DRIVES;.\USER;.\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\taskMenus.lst) TABS (2) OBJECT(.\Outputs\taskMenus.obj)

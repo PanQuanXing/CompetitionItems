@@ -1,0 +1,351 @@
+C51 COMPILER V9.56.0.0   PQXMLX90614                                                       02/21/2018 14:26:17 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE PQXMLX90614
+OBJECT MODULE PLACED IN .\Outputs\PqxMLX90614.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE DRIVES\PqxMLX90614.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\US
+                    -ER;.\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\PqxMLX90614.lst) TABS(2) OBJECT(.\Outputs\PqxMLX90614.obj)
+
+line level    source
+
+   1          #include "PqxMLX90614.h"
+   2          
+   3          void initMLX90614(){
+   4   1        Pwm2Smbus();
+   5   1      }
+   6          
+   7          static void Pwm2Smbus(){
+   8   1        _SCL_OUTPUT();
+   9   1        _nop_();_nop_();_nop_();
+  10   1        _nop_();_nop_();_nop_();
+  11   1        SCL=1;
+  12   1        _nop_();_nop_();_nop_();
+  13   1        _nop_();_nop_();_nop_();
+  14   1        SCL=0;
+  15   1        Delay_ms(4);
+  16   1        SCL=1;
+  17   1        _nop_();_nop_();_nop_();
+  18   1        _nop_();_nop_();_nop_();
+  19   1      }
+  20          
+  21          static void start_bit(){
+  22   1        _SDA_OUTPUT();
+  23   1        _nop_();_nop_();_nop_();
+  24   1        _nop_();_nop_();_nop_();
+  25   1        SDA=1;
+  26   1        SCL=1;
+  27   1        SmbusDelay10us();
+  28   1        SDA=0;
+  29   1        SmbusDelay10us();
+  30   1        SCL=0;
+  31   1        SmbusDelay10us();
+  32   1      }
+  33          
+  34          static void stop_bit(){
+  35   1        _SDA_OUTPUT();
+  36   1        SDA=0;
+  37   1        SCL=0;
+  38   1        SmbusDelay10us();
+  39   1        SDA=1;
+  40   1        SmbusDelay10us();
+  41   1        SCL=1;
+  42   1        SmbusDelay20us();
+  43   1      }
+  44          static void SmbusAck(){
+  45   1        _SDA_OUTPUT();
+  46   1        _nop_();_nop_();_nop_();
+  47   1        _nop_();_nop_();_nop_();
+  48   1        SDA=0;
+  49   1        _nop_();_nop_();_nop_();
+  50   1        _nop_();_nop_();_nop_();
+  51   1        SCL=1;
+  52   1        SmbusDelay10us();
+  53   1        SCL=0;
+  54   1        SmbusDelay10us();
+C51 COMPILER V9.56.0.0   PQXMLX90614                                                       02/21/2018 14:26:17 PAGE 2   
+
+  55   1      }
+  56          
+  57          static void SmbusNack(){
+  58   1        _SDA_OUTPUT();
+  59   1        _nop_();_nop_();_nop_();
+  60   1        _nop_();_nop_();_nop_();
+  61   1        SDA=1;
+  62   1        _nop_();_nop_();_nop_();
+  63   1        _nop_();_nop_();_nop_();
+  64   1        SCL=1;
+  65   1        SmbusDelay10us();
+  66   1        SCL=0;
+  67   1        SmbusDelay10us();
+  68   1      }
+  69          //发送8个字节数据，且包含等待应答位的函数
+  70          static bit send_byte(unsigned char ddata){
+  71   1        unsigned char i=0;
+  72   1        _SDA_OUTPUT();
+  73   1        _nop_();_nop_();_nop_();
+  74   1        _nop_();_nop_();_nop_();
+  75   1        for(i=0;i<8;i++){
+  76   2          if(ddata&0x80)
+  77   2            SDA=1;
+  78   2          else
+  79   2            SDA=0;
+  80   2          ddata<<=1;
+  81   2          _nop_();_nop_();_nop_();
+  82   2          _nop_();_nop_();_nop_();
+  83   2          SCL=1;
+  84   2          SmbusDelay10us();
+  85   2          SCL=0;
+  86   2          SmbusDelay10us();
+  87   2        }
+  88   1        _SDA_INPUT();
+  89   1        //延时2us
+  90   1        _nop_();_nop_();_nop_();
+  91   1        _nop_();_nop_();_nop_();
+  92   1        SCL=1;
+  93   1        //延时4us
+  94   1        _nop_();_nop_();_nop_();
+  95   1        _nop_();_nop_();_nop_();
+  96   1        _nop_();_nop_();_nop_();
+  97   1        _nop_();_nop_();_nop_();
+  98   1        if(SDA)
+  99   1        {
+ 100   2          //延时4us
+ 101   2          _nop_();_nop_();_nop_();
+ 102   2          _nop_();_nop_();_nop_();
+ 103   2          _nop_();_nop_();_nop_();
+ 104   2          _nop_();_nop_();_nop_();
+ 105   2          SCL=0;
+ 106   2          //延时10us
+ 107   2          SmbusDelay10us();
+ 108   2          return false;
+ 109   2        }
+ 110   1        //延时4us
+ 111   1        _nop_();_nop_();_nop_();
+ 112   1        _nop_();_nop_();_nop_();
+ 113   1        _nop_();_nop_();_nop_();
+ 114   1        _nop_();_nop_();_nop_();
+ 115   1        SCL=0;
+ 116   1        SmbusDelay10us();
+C51 COMPILER V9.56.0.0   PQXMLX90614                                                       02/21/2018 14:26:17 PAGE 3   
+
+ 117   1        return true;
+ 118   1      }
+ 119          
+ 120          
+ 121          static unsigned char receive_byte(void){
+ 122   1        unsigned char i=8,ddata=0;
+ 123   1        _SDA_INPUT();
+ 124   1        //延时2us
+ 125   1        _nop_();_nop_();_nop_();
+ 126   1        _nop_();_nop_();_nop_();
+ 127   1        while(i--){
+ 128   2          //从最高位开始接收
+ 129   2          ddata<<=1;
+ 130   2          SCL=1;
+ 131   2          //延时4us
+ 132   2          _nop_();_nop_();_nop_();
+ 133   2          _nop_();_nop_();_nop_();
+ 134   2          _nop_();_nop_();_nop_();
+ 135   2          _nop_();_nop_();_nop_();
+ 136   2          if(SDA){
+ 137   3            ddata|=0x01;
+ 138   3          }else{
+ 139   3            ddata&=0xfe;
+ 140   3          } 
+ 141   2          //延时2us
+ 142   2          _nop_();_nop_();_nop_();
+ 143   2          _nop_();_nop_();_nop_();
+ 144   2          SCL=0;
+ 145   2          //延时10us
+ 146   2          SmbusDelay10us();
+ 147   2        }
+ 148   1        return ddata;
+ 149   1      }
+ 150          
+ 151          short PqxMemRead(unsigned char slaveAddress,unsigned char cmd){
+ 152   1        unsigned char PEC=0;
+ 153   1        unsigned char MSG[5];
+ 154   1        int result=0;
+ 155   1        MSG[0]=(slaveAddress<<1);
+ 156   1        MSG[1]=cmd;
+ 157   1        MSG[2]=MSG[0]+1;
+ 158   1        
+ 159   1        start_bit();
+ 160   1        
+ 161   1        if(!send_byte(MSG[0])){
+ 162   2          stop_bit();
+ 163   2          return 0x0000;
+ 164   2        }   
+ 165   1                    
+ 166   1        if(!send_byte(MSG[1])){
+ 167   2          stop_bit();
+ 168   2          return 0x0000;
+ 169   2        }
+ 170   1        
+ 171   1        start_bit();
+ 172   1        
+ 173   1        if(!send_byte(MSG[2])){
+ 174   2          stop_bit();
+ 175   2          return 0x0000;  
+ 176   2        }
+ 177   1        
+ 178   1        MSG[3]=receive_byte();
+C51 COMPILER V9.56.0.0   PQXMLX90614                                                       02/21/2018 14:26:17 PAGE 4   
+
+ 179   1        SmbusAck();
+ 180   1        
+ 181   1        MSG[4]=receive_byte();
+ 182   1        SmbusAck();
+ 183   1        
+ 184   1        PEC=receive_byte();
+ 185   1        if(PEC==CalculatePEC(MSG,5)){
+ 186   2          SmbusAck();
+ 187   2        }else{
+ 188   2          SmbusNack();
+ 189   2          stop_bit();
+ 190   2          return 0x0000;
+ 191   2        }
+ 192   1        stop_bit();
+ 193   1        
+ 194   1        result=MSG[4];
+ 195   1        result<<=8;
+ 196   1        result+=MSG[3];
+ 197   1      
+ 198   1        return result;
+ 199   1      }
+ 200          
+ 201          unsigned char CalculatePEC(unsigned char* msg,int len){ 
+ 202   1      //MLX90614的校验原始数据msg一般为5位，{SlaveAddress,Command,SlaveAddress+1,DataL,DataH};
+ 203   1           unsigned char i;         //CRC8校验表索引             
+ 204   1           unsigned char ucCRC8=0;  //CRC8校验码字节初始化 
+ 205   1           //查表计算CRC校验码            
+ 206   1           while(len--){  
+ 207   2               i=ucCRC8^(*msg);  
+ 208   2               msg++;
+ 209   2               ucCRC8=CRC8TAB[i];    
+ 210   2           }            
+ 211   1           return ucCRC8;     
+ 212   1      } 
+ 213          
+ 214          float Data2TempK(int ddata){
+ 215   1        return ddata*0.02;
+ 216   1      }
+ 217          
+ 218          float Data2TempC(int ddata){//此处参数用short会丢失精度
+ 219   1        float result=ddata*0.02;
+ 220   1        result-=273.15;
+ 221   1        return result;
+ 222   1      }
+ 223          
+ 224          int TempC2Data(float result){
+ 225   1        result+=273.15;
+ 226   1        result*=50;
+ 227   1        return (int)result;
+ 228   1      }
+ 229          
+ 230          //向MLX90614的EEPROM中写入数据
+ 231          void PqxMemWrite(unsigned char slaveAddress,unsigned char cmd,unsigned char dataH,unsigned char dataL){
+ 232   1        unsigned char PEC;
+ 233   1        unsigned char MSG[4];
+ 234   1        MSG[0]=(slaveAddress<<1);
+ 235   1        MSG[1]=cmd;
+ 236   1      //  MSG[2]=MSG[0]+1;
+ 237   1        MSG[2]=dataL;
+ 238   1        MSG[3]=dataH;
+ 239   1        PEC=CalculatePEC(MSG,4);
+ 240   1        
+C51 COMPILER V9.56.0.0   PQXMLX90614                                                       02/21/2018 14:26:17 PAGE 5   
+
+ 241   1        start_bit();
+ 242   1        if(!send_byte(MSG[0])){
+ 243   2          stop_bit();
+ 244   2        } 
+ 245   1        if(!send_byte(MSG[1])){
+ 246   2          stop_bit();
+ 247   2        }
+ 248   1        if(!send_byte(MSG[2])){
+ 249   2          stop_bit();
+ 250   2        } 
+ 251   1        if(!send_byte(MSG[3])){
+ 252   2          stop_bit();
+ 253   2        } 
+ 254   1        if(!send_byte(PEC)){
+ 255   2          stop_bit();
+ 256   2        } 
+ 257   1        
+ 258   1        stop_bit();
+ 259   1        
+ 260   1        Delay_ms(10);
+ 261   1      }
+ 262          
+ 263          void PqxEepromWrite(unsigned char slaveAddress,unsigned char cmd,unsigned char dataH,unsigned char dataL){
+ 264   1        PqxMemWrite(slaveAddress,cmd,0x00,0x00);
+ 265   1        PqxMemWrite(slaveAddress,cmd,dataH,dataL);
+ 266   1      }
+ 267          
+ 268          bit EnterSleepMode(unsigned char slaveAddress){
+ 269   1        unsigned char MSG[2],PEC;
+ 270   1        MSG[0]=(slaveAddress<<1);
+ 271   1        MSG[1]=0xff;
+ 272   1      //  PEC=CalculatePEC(MSG,2);//计算PEC校验码
+ 273   1        PEC=0xf3;
+ 274   1        start_bit();
+ 275   1        if(!send_byte(MSG[0])){
+ 276   2          stop_bit();
+ 277   2          return false;
+ 278   2        } 
+ 279   1        if(!send_byte(0xff)){
+ 280   2          stop_bit();
+ 281   2          return false;
+ 282   2        }
+ 283   1        if(!send_byte(PEC)){
+ 284   2          stop_bit();
+ 285   2          return false;
+ 286   2        } 
+ 287   1        stop_bit();
+ 288   1        return true;
+ 289   1      }
+ 290          
+ 291          //10进制float转16进制
+ 292          //默认byteArry的长度len为sizeof(float)
+ 293          //float类型一共4字节，低两位代表小数点后面小数
+ 294          void Float2Emissivity(float e,unsigned char* dataH,unsigned char* dataL){
+ 295   1        int num;
+ 296   1        unsigned char i;
+ 297   1        unsigned char emissivityArry[4];
+ 298   1        i=0;
+ 299   1        num=(int)(e*65535+0.5);
+ 300   1        num&=0xffff;
+ 301   1        for(i=0;i<4;i++){
+ 302   2            emissivityArry[i]=num&0xf;
+C51 COMPILER V9.56.0.0   PQXMLX90614                                                       02/21/2018 14:26:17 PAGE 6   
+
+ 303   2            num>>=4;
+ 304   2        }
+ 305   1        (*dataL)=(emissivityArry[1]<<4)+emissivityArry[0];   
+ 306   1        (*dataH)=(emissivityArry[3]<<4)+emissivityArry[2];    
+ 307   1      }
+ 308          
+ 309          void ChangeEmissivity(unsigned char slaveAddress,float emissivity){
+ 310   1        unsigned char EmL;
+ 311   1        unsigned char EmH;
+ 312   1        EA=0;//进入临界区
+ 313   1        Float2Emissivity(emissivity,&EmH,&EmL);
+ 314   1        PqxEepromWrite(slaveAddress,0x24,EmH,EmL);
+ 315   1        EnterSleepMode(slaveAddress);
+ 316   1        EA=1;//退出临界区
+ 317   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1222    ----
+   CONSTANT SIZE    =    256    ----
+   XDATA SIZE       =   ----      59
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

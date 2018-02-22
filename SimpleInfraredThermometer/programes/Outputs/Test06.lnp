@@ -1,0 +1,14 @@
+".\Outputs\PqxDelay.obj",
+".\Outputs\PqxMLX90614.obj",
+".\Outputs\PqxKeys.obj",
+".\Outputs\PqxFont.obj",
+".\Outputs\PqxMenus.obj",
+".\Outputs\panquanxing.obj",
+".\Outputs\OLED12832.obj",
+".\Outputs\taskStart.obj",
+".\Outputs\taskKeys.obj",
+".\Outputs\taskMLX90614.obj",
+".\Outputs\taskEEPROM.obj",
+".\Outputs\Conf_tny.obj" 
+TO ".\Outputs\Test06" Rtx51Tiny 
+PRINT(".\Listings\Test06.m51") RAMSIZE(256) 

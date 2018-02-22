@@ -1,0 +1,699 @@
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE EXAMPLE_EEPROM_MULTIBYTE_WRITE
+OBJECT MODULE PLACED IN .\Objects\example_eeprom_multibyte_write.obj
+COMPILER INVOKED BY: D:\Program Files (x86)\Keil_v5\C51\BIN\C51.EXE example_eeprom_multibyte_write.c OPTIMIZE(8,SPEED) B
+                    -ROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\example_eeprom_multibyte_write.lst) TABS(2) OBJECT(.\Objects\example_eeprom_mu
+                    -ltibyte_write.obj)
+
+line level    source
+
+   1          
+   2          
+   3          /*---------------------------------------------------------------------*/
+   4          /* --- STC MCU Limited ------------------------------------------------*/
+   5          /* --- STC 1T Series MCU Demo Programme -------------------------------*/
+   6          /* --- Mobile: (86)13922805190 ----------------------------------------*/
+   7          /* --- Fax: 86-0513-55012956,55012947,55012969 -----------------------*/
+   8          /* --- Tel: 86-0513-55012928,55012929,55012966 ------------------------*/
+   9          /* --- Web: www.STCMCU.com --------------------------------------------*/
+  10          /* --- Web: www.GXWMCU.com --------------------------------------------*/
+  11          /* --- QQ:  800003751 -------------------------------------------------*/
+  12          /* Èç¹ûÒªÔÚ³ÌÐòÖÐÊ¹ÓÃ´Ë´úÂë,ÇëÔÚ³ÌÐòÖÐ×¢Ã÷Ê¹ÓÃÁËSTCµÄ×ÊÁÏ¼°³ÌÐò        */
+  13          /*---------------------------------------------------------------------*/
+  14          
+  15          
+  16          
+  17          /*************  ±¾³ÌÐò¹¦ÄÜËµÃ÷  **************
+  18          
+  19                          ²âÊÔËµÃ÷
+  20          
+  21          Í¨¹ý´®¿Ú¶ÔSTCÄÚ²¿×Ô´øµÄEEPROM(FLASH)½øÐÐ¶ÁÐ´²âÊÔ¡£
+  22          
+  23          ¶ÔFLASH×öÉÈÇø²Á³ý¡¢Ð´Èë¡¢¶Á³öµÄ²Ù×÷£¬ÃüÁîÖ¸¶¨µØÖ·¡£
+  24          
+  25          Ä¬ÈÏ²¨ÌØÂÊ:  115200,8,N,1. 
+  26          Ä¬ÈÏÖ÷Ê±ÖÓ:  11059200HZ.
+  27          
+  28          ´®¿ÚÃüÁîÉèÖÃ: (ÃüÁî×ÖÄ¸²»Çø·Ö´óÐ¡Ð´)
+  29              W 0x8000 1234567890  --> ¶Ô0x8000µØÖ·Ð´Èë×Ö·û1234567890.
+  30              R 0x8000 10          --> ¶Ô0x8000µØÖ·¶Á³ö10¸ö×Ö½ÚÊý¾Ý. 
+  31          
+  32          ×¢Òâ£ºÎªÁËÍ¨ÓÃ£¬³ÌÐò²»Ê¶±ðµØÖ·ÊÇ·ñÓÐÐ§£¬ÓÃ»§×Ô¼º¸ù¾Ý¾ßÌåµÄÐÍºÅÀ´¾ö¶¨¡£
+  33          
+  34          ******************************************/
+  35          
+  36          #include    "reg51.h"
+  37          #include    "intrins.h"
+  38          
+  39          #define     MAIN_Fosc       11059200L   //¶¨ÒåÖ÷Ê±ÖÓ
+  40          
+  41          typedef     unsigned char   u8;
+  42          typedef     unsigned int    u16;
+  43          typedef     unsigned long   u32;
+  44          
+  45          sfr TH2  = 0xD6;
+  46          sfr TL2  = 0xD7;
+  47          sfr IE2   = 0xAF;
+  48          sfr INT_CLKO = 0x8F;
+  49          sfr AUXR = 0x8E;
+  50          sfr AUXR1 = 0xA2;
+  51          sfr P_SW1 = 0xA2;
+  52          sfr P_SW2 = 0xBA;
+  53          sfr S2CON = 0x9A;
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 2   
+
+  54          sfr S2BUF = 0x9B;
+  55          
+  56          sfr ISP_DATA  = 0xC2;
+  57          sfr ISP_ADDRH = 0xC3;
+  58          sfr ISP_ADDRL = 0xC4;
+  59          sfr ISP_CMD   = 0xC5;
+  60          sfr ISP_TRIG  = 0xC6;
+  61          sfr ISP_CONTR = 0xC7;
+  62          
+  63          sfr ADC_CONTR = 0xBC;   //´øADÏµÁÐ
+  64          sfr ADC_RES   = 0xBD;   //´øADÏµÁÐ
+  65          sfr ADC_RESL  = 0xBE;   //´øADÏµÁÐ
+  66          sfr P1ASF = 0x9D;   //Ö»Ð´£¬Ä£ÄâÊäÈë(AD»òLVD)Ñ¡Ôñ
+  67          
+  68          sfr P4   = 0xC0;
+  69          sfr P5   = 0xC8;
+  70          sfr P6   = 0xE8;
+  71          sfr P7   = 0xF8;
+  72          sfr P1M1 = 0x91;    //PxM1.n,PxM0.n     =00--->Standard,    01--->push-pull
+  73          sfr P1M0 = 0x92;    //                  =10--->pure input,  11--->open drain
+  74          sfr P0M1 = 0x93;
+  75          sfr P0M0 = 0x94;
+  76          sfr P2M1 = 0x95;
+  77          sfr P2M0 = 0x96;
+  78          sfr P3M1 = 0xB1;
+  79          sfr P3M0 = 0xB2;
+  80          sfr P4M1 = 0xB3;
+  81          sfr P4M0 = 0xB4;
+  82          sfr P5M1 = 0xC9;
+  83          sfr P5M0 = 0xCA;
+  84          sfr P6M1 = 0xCB;
+  85          sfr P6M0 = 0xCC;
+  86          sfr P7M1 = 0xE1;
+  87          sfr P7M0 = 0xE2;
+  88          
+  89          sbit P00 = P0^0;
+  90          sbit P01 = P0^1;
+  91          sbit P02 = P0^2;
+  92          sbit P03 = P0^3;
+  93          sbit P04 = P0^4;
+  94          sbit P05 = P0^5;
+  95          sbit P06 = P0^6;
+  96          sbit P07 = P0^7;
+  97          sbit P10 = P1^0;
+  98          sbit P11 = P1^1;
+  99          sbit P12 = P1^2;
+ 100          sbit P13 = P1^3;
+ 101          sbit P14 = P1^4;
+ 102          sbit P15 = P1^5;
+ 103          sbit P16 = P1^6;
+ 104          sbit P17 = P1^7;
+ 105          sbit P20 = P2^0;
+ 106          sbit P21 = P2^1;
+ 107          sbit P22 = P2^2;
+ 108          sbit P23 = P2^3;
+ 109          sbit P24 = P2^4;
+ 110          sbit P25 = P2^5;
+ 111          sbit P26 = P2^6;
+ 112          sbit P27 = P2^7;
+ 113          sbit P30 = P3^0;
+ 114          sbit P31 = P3^1;
+ 115          sbit P32 = P3^2;
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 3   
+
+ 116          sbit P33 = P3^3;
+ 117          sbit P34 = P3^4;
+ 118          sbit P35 = P3^5;
+ 119          sbit P36 = P3^6;
+ 120          sbit P37 = P3^7;
+ 121          sbit P40 = P4^0;
+ 122          sbit P41 = P4^1;
+ 123          sbit P42 = P4^2;
+ 124          sbit P43 = P4^3;
+ 125          sbit P44 = P4^4;
+ 126          sbit P45 = P4^5;
+ 127          sbit P46 = P4^6;
+ 128          sbit P47 = P4^7;
+ 129          sbit P50 = P5^0;
+ 130          sbit P51 = P5^1;
+ 131          sbit P52 = P5^2;
+ 132          sbit P53 = P5^3;
+ 133          sbit P54 = P5^4;
+ 134          sbit P55 = P5^5;
+ 135          sbit P56 = P5^6;
+ 136          sbit P57 = P5^7;
+ 137          
+ 138          
+ 139          #define     Baudrate1           115200L
+ 140          #define     Tmp_Length          70      //¶ÁÐ´EEPROM»º³å³¤¶È
+ 141          
+ 142          #define     UART1_BUF_LENGTH    (Tmp_Length+9)  //´®¿Ú»º³å³¤¶È
+ 143          
+ 144          u8  RX1_TimeOut;
+ 145          u8  TX1_Cnt;    //·¢ËÍ¼ÆÊý
+ 146          u8  RX1_Cnt;    //½ÓÊÕ¼ÆÊý
+ 147          bit B_TX1_Busy; //·¢ËÍÃ¦±êÖ¾
+ 148          
+ 149          u8  xdata   RX1_Buffer[UART1_BUF_LENGTH];   //½ÓÊÕ»º³å
+ 150          u8  xdata   tmp[Tmp_Length];        //EEPROM²Ù×÷»º³å
+ 151          
+ 152          
+ 153          void    UART1_config(u8 brt);   // Ñ¡Ôñ²¨ÌØÂÊ, 2: Ê¹ÓÃTimer2×ö²¨ÌØÂÊ, ÆäËüÖµ: Ê¹ÓÃTimer1×ö²¨ÌØÂÊ.
+ 154          void    PrintString1(u8 *puts);
+ 155          void    UART1_TxByte(u8 dat);
+ 156          void    delay_ms(u8 ms);
+ 157          u8      CheckData(u8 dat);
+ 158          u16     GetAddress(void);
+ 159          u8      GetDataLength(void);
+ 160          void    EEPROM_SectorErase(u16 EE_address);
+ 161          void    EEPROM_read_n(u16 EE_address,u8 *DataAddress,u8 length);
+ 162          u8      EEPROM_write_n(u16 EE_address,u8 *DataAddress,u8 length);
+ 163          
+ 164          
+ 165          /********************* Ö÷º¯Êý *************************/
+ 166          void main(void)
+ 167          {
+ 168   1          u8  i,j;
+ 169   1          u16 addr;
+ 170   1          u8  status;
+ 171   1      
+ 172   1          P0M1 = 0;   P0M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 173   1          P1M1 = 0;   P1M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 174   1          P2M1 = 0;   P2M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 175   1          P3M1 = 0;   P3M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 176   1          P4M1 = 0;   P4M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 177   1          P5M1 = 0;   P5M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 4   
+
+ 178   1          P6M1 = 0;   P6M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 179   1          P7M1 = 0;   P7M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 180   1      
+ 181   1          UART1_config(1);    // Ñ¡Ôñ²¨ÌØÂÊ, 2: Ê¹ÓÃTimer2×ö²¨ÌØÂÊ, ÆäËüÖµ: Ê¹ÓÃTimer1×ö²¨ÌØÂÊ.
+ 182   1          EA = 1; //ÔÊÐí×ÜÖÐ¶Ï
+ 183   1      
+ 184   1          PrintString1("STC15F2K60S2ÏµÁÐµ¥Æ¬»úEEPROM²âÊÔ³ÌÐò, ´®¿ÚÃüÁîÉèÖÃÈçÏÂÊ¾Àý:\r\n");    //SUART1·¢ËÍÒ»¸ö×Ö
+             -·û´®
+ 185   1          PrintString1("W 0x8000 1234567890  --> ¶Ô0x8000µØÖ·Ð´Èë×Ö·û1234567890.\r\n");   //SUART1·¢ËÍÒ»¸ö×Ö·û´®
+ 186   1          PrintString1("R 0x8000 10          --> ¶Ô0x8000µØÖ·¶Á³ö10¸ö×Ö½ÚÊý¾Ý.\r\n"); //SUART1·¢ËÍÒ»¸ö×Ö·û´®
+ 187   1      
+ 188   1          while(1)
+ 189   1          {
+ 190   2              delay_ms(1);
+ 191   2              if(RX1_TimeOut > 0)     //³¬Ê±¼ÆÊý
+ 192   2              {
+ 193   3                  if(--RX1_TimeOut == 0)
+ 194   3                  {
+ 195   4              //      for(i=0; i<RX1_Cnt; i++)    UART1_TxByte(RX1_Buffer[i]);    //°ÑÊÕµ½µÄÊý¾ÝÔ­Ñù·µ»Ø,ÓÃÓÚ²âÊ
+             -Ô
+ 196   4      
+ 197   4                      status = 0xff;  //×´Ì¬¸øÒ»¸ö·Ç0Öµ
+ 198   4                      if((RX1_Cnt >= 10) && (RX1_Buffer[1] == ' ') && (RX1_Buffer[8] == ' ')) //×î¶ÌÃüÁîÎª10¸ö×Ö
+             -½Ú
+ 199   4                      {
+ 200   5                          for(i=0; i<8; i++)
+ 201   5                          {
+ 202   6                              if((RX1_Buffer[i] >= 'a') && (RX1_Buffer[i] <= 'z'))    RX1_Buffer[i] = RX1_Buffer
+             -[i] - 'a' + 'A';  //Ð¡Ð´×ª´óÐ´
+ 203   6                          }
+ 204   5                          addr = GetAddress();
+ 205   5                          if(addr < 63488)    //ÏÞÖÆÔÚ0~123ÉÈÇø
+ 206   5                          {
+ 207   6                              if(RX1_Buffer[0] == 'W')    //Ð´ÈëN¸ö×Ö½Ú
+ 208   6                              {
+ 209   7                                  j = RX1_Cnt - 9;
+ 210   7                                  if(j > Tmp_Length)  j = Tmp_Length; //Ô½½ç¼ì²â
+ 211   7                                  EEPROM_SectorErase(addr);           //²Á³ýÉÈÇø
+ 212   7                                  i = EEPROM_write_n(addr,&RX1_Buffer[9],j);      //Ð´N¸ö×Ö½Ú
+ 213   7                                  if(i == 0)
+ 214   7                                  {
+ 215   8                                      PrintString1("ÒÑÐ´Èë");
+ 216   8                                      if(j >= 100)    {UART1_TxByte(j/100+'0');   j = j % 100;}
+ 217   8                                      if(j >= 10)     {UART1_TxByte(j/10+'0');    j = j % 10;}
+ 218   8                                      UART1_TxByte(j%10+'0');
+ 219   8                                      PrintString1("×Ö½ÚÊý¾Ý!\r\n");
+ 220   8                                  }
+ 221   7                                  else    PrintString1("Ð´Èë´íÎó!\r\n");
+ 222   7                                  status = 0; //ÃüÁîÕýÈ·
+ 223   7                              }
+ 224   6      
+ 225   6                              else if(RX1_Buffer[0] == 'R')   //PCÇëÇó·µ»ØN×Ö½ÚEEPROMÊý¾Ý
+ 226   6                              {
+ 227   7                                  j = GetDataLength();
+ 228   7                                  if(j > Tmp_Length)  j = Tmp_Length; //Ô½½ç¼ì²â
+ 229   7                                  if(j > 0)
+ 230   7                                  {
+ 231   8                                      PrintString1("¶Á³ö");
+ 232   8                                      UART1_TxByte(j/10+'0');
+ 233   8                                      UART1_TxByte(j%10+'0');
+ 234   8                                      PrintString1("¸ö×Ö½ÚÊý¾ÝÈçÏÂ£º\r\n");
+ 235   8                                      EEPROM_read_n(addr,tmp,j);
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 5   
+
+ 236   8                                      for(i=0; i<j; i++)  UART1_TxByte(tmp[i]);
+ 237   8                                      UART1_TxByte(0x0d);
+ 238   8                                      UART1_TxByte(0x0a);
+ 239   8                                      status = 0; //ÃüÁîÕýÈ·
+ 240   8                                  }
+ 241   7                              }
+ 242   6                          }
+ 243   5                      }
+ 244   4                      if(status != 0) PrintString1("ÃüÁî´íÎó!\r\n");
+ 245   4                      RX1_Cnt  = 0;   //Çå³ý×Ö½ÚÊý
+ 246   4                  }
+ 247   3              }
+ 248   2          }
+ 249   1      }
+ 250          //========================================================================
+ 251          
+ 252          
+ 253          //========================================================================
+ 254          // º¯Êý: void  delay_ms(unsigned char ms)
+ 255          // ÃèÊö: ÑÓÊ±º¯Êý¡£
+ 256          // ²ÎÊý: ms,ÒªÑÓÊ±µÄmsÊý, ÕâÀïÖ»Ö§³Ö1~255ms. ×Ô¶¯ÊÊÓ¦Ö÷Ê±ÖÓ.
+ 257          // ·µ»Ø: none.
+ 258          // °æ±¾: VER1.0
+ 259          // ÈÕÆÚ: 2013-4-1
+ 260          // ±¸×¢: 
+ 261          //========================================================================
+ 262          void  delay_ms(u8 ms)
+ 263          {
+ 264   1           unsigned int i;
+ 265   1           do{
+ 266   2                i = MAIN_Fosc / 14000;
+ 267   2                while(--i)    ;   //14T per loop
+ 268   2           }while(--ms);
+ 269   1      }
+ 270          
+ 271          //========================================================================
+ 272          // º¯Êý: u8 CheckData(u8 dat)
+ 273          // ÃèÊö: ½«×Ö·û"0~9,A~F»òa~f"×ª³ÉÊ®Áù½øÖÆ.
+ 274          // ²ÎÊý: dat: Òª¼ì²âµÄ×Ö·û.
+ 275          // ·µ»Ø: 0x00~0x0FÎªÕýÈ·. 0xFFÎª´íÎó.
+ 276          // °æ±¾: V1.0, 2012-10-22
+ 277          //========================================================================
+ 278          u8  CheckData(u8 dat)
+ 279          {
+ 280   1          if((dat >= '0') && (dat <= '9'))        return (dat-'0');
+ 281   1          if((dat >= 'A') && (dat <= 'F'))        return (dat-'A'+10);
+ 282   1          return 0xff;
+ 283   1      }
+ 284          
+ 285          //========================================================================
+ 286          // º¯Êý: u16    GetAddress(void)
+ 287          // ÃèÊö: ¼ÆËã¸÷ÖÖÊäÈë·½Ê½µÄµØÖ·.
+ 288          // ²ÎÊý: ÎÞ.
+ 289          // ·µ»Ø: 16Î»EEPROMµØÖ·.
+ 290          // °æ±¾: V1.0, 2013-6-6
+ 291          //========================================================================
+ 292          u16 GetAddress(void)
+ 293          {
+ 294   1          u16 address;
+ 295   1          u8  i,j;
+ 296   1          
+ 297   1          address = 0;
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 6   
+
+ 298   1          if((RX1_Buffer[2] == '0') && (RX1_Buffer[3] == 'X'))
+ 299   1          {
+ 300   2              for(i=4; i<8; i++)
+ 301   2              {
+ 302   3                  j = CheckData(RX1_Buffer[i]);
+ 303   3                  if(j >= 0x10)   return 65535;   //error
+ 304   3                  address = (address << 4) + j;
+ 305   3              }
+ 306   2              return (address);
+ 307   2          }
+ 308   1          return  65535;  //error
+ 309   1      }
+ 310          
+ 311          /**************** »ñÈ¡Òª¶Á³öÊý¾ÝµÄ×Ö½ÚÊý ****************************/
+ 312          u8  GetDataLength(void)
+ 313          {
+ 314   1          u8  i;
+ 315   1          u8  length;
+ 316   1          
+ 317   1          length = 0;
+ 318   1          for(i=9; i<RX1_Cnt; i++)
+ 319   1          {
+ 320   2              if(CheckData(RX1_Buffer[i]) >= 10)  break;
+ 321   2              length = length * 10 + CheckData(RX1_Buffer[i]);
+ 322   2          }
+ 323   1          return (length);
+ 324   1      }
+ 325          
+ 326          
+ 327          //========================================================================
+ 328          // º¯Êý: void PrintString1(u8 *puts)
+ 329          // ÃèÊö: ´®¿Ú1·¢ËÍ×Ö·û´®º¯Êý¡£
+ 330          // ²ÎÊý: puts:  ×Ö·û´®Ö¸Õë.
+ 331          // ·µ»Ø: none.
+ 332          // °æ±¾: VER1.0
+ 333          // ÈÕÆÚ: 2014-11-28
+ 334          // ±¸×¢: 
+ 335          //========================================================================
+ 336          void PrintString1(u8 *puts) //·¢ËÍÒ»¸ö×Ö·û´®
+ 337          {
+ 338   1          for (; *puts != 0;  puts++) UART1_TxByte(*puts);    //Óöµ½Í£Ö¹·û0½áÊø
+ 339   1      }
+ 340          
+ 341          //========================================================================
+ 342          // º¯Êý: SetTimer2Baudraye(u16 dat)
+ 343          // ÃèÊö: ÉèÖÃTimer2×ö²¨ÌØÂÊ·¢ÉúÆ÷¡£
+ 344          // ²ÎÊý: dat: Timer2µÄÖØ×°Öµ.
+ 345          // ·µ»Ø: none.
+ 346          // °æ±¾: VER1.0
+ 347          // ÈÕÆÚ: 2014-11-28
+ 348          // ±¸×¢: 
+ 349          //========================================================================
+ 350          void    SetTimer2Baudraye(u16 dat)  // Ñ¡Ôñ²¨ÌØÂÊ, 2: Ê¹ÓÃTimer2×ö²¨ÌØÂÊ, ÆäËüÖµ: Ê¹ÓÃTimer1×ö²¨ÌØÂÊ.
+ 351          {
+ 352   1          AUXR &= ~(1<<4);    //Timer stop
+ 353   1          AUXR &= ~(1<<3);    //Timer2 set As Timer
+ 354   1          AUXR |=  (1<<2);    //Timer2 set as 1T mode
+ 355   1          TH2 = dat / 256;
+ 356   1          TL2 = dat % 256;
+ 357   1          IE2  &= ~(1<<2);    //½ûÖ¹ÖÐ¶Ï
+ 358   1          AUXR |=  (1<<4);    //Timer run enable
+ 359   1      }
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 7   
+
+ 360          
+ 361          //========================================================================
+ 362          // º¯Êý: void   UART1_config(u8 brt)
+ 363          // ÃèÊö: UART1³õÊ¼»¯º¯Êý¡£
+ 364          // ²ÎÊý: brt: Ñ¡Ôñ²¨ÌØÂÊ, 2: Ê¹ÓÃTimer2×ö²¨ÌØÂÊ, ÆäËüÖµ: Ê¹ÓÃTimer1×ö²¨ÌØÂÊ.
+ 365          // ·µ»Ø: none.
+ 366          // °æ±¾: VER1.0
+ 367          // ÈÕÆÚ: 2014-11-28
+ 368          // ±¸×¢: 
+ 369          //========================================================================
+ 370          void    UART1_config(u8 brt)    // Ñ¡Ôñ²¨ÌØÂÊ, 2: Ê¹ÓÃTimer2×ö²¨ÌØÂÊ, ÆäËüÖµ: Ê¹ÓÃTimer1×ö²¨ÌØÂÊ.
+ 371          {
+ 372   1          /*********** ²¨ÌØÂÊÊ¹ÓÃ¶¨Ê±Æ÷2 *****************/
+ 373   1          if(brt == 2)
+ 374   1          {
+ 375   2              AUXR |= 0x01;       //S1 BRT Use Timer2;
+ 376   2              SetTimer2Baudraye(65536UL - (MAIN_Fosc / 4) / Baudrate1);
+ 377   2          }
+ 378   1      
+ 379   1          /*********** ²¨ÌØÂÊÊ¹ÓÃ¶¨Ê±Æ÷1 *****************/
+ 380   1          else
+ 381   1          {
+ 382   2              TR1 = 0;
+ 383   2              AUXR &= ~0x01;      //S1 BRT Use Timer1;
+ 384   2              AUXR |=  (1<<6);    //Timer1 set as 1T mode
+ 385   2              TMOD &= ~(1<<6);    //Timer1 set As Timer
+ 386   2              TMOD &= ~0x30;      //Timer1_16bitAutoReload;
+ 387   2              TH1 = (u8)((65536UL - (MAIN_Fosc / 4) / Baudrate1) / 256);
+ 388   2              TL1 = (u8)((65536UL - (MAIN_Fosc / 4) / Baudrate1) % 256);
+ 389   2              ET1 = 0;    //½ûÖ¹ÖÐ¶Ï
+ 390   2              INT_CLKO &= ~0x02;  //²»Êä³öÊ±ÖÓ
+ 391   2              TR1  = 1;
+ 392   2          }
+ 393   1          /*************************************************/
+ 394   1      
+ 395   1          SCON = (SCON & 0x3f) | 0x40;    //UART1Ä£Ê½, 0x00: Í¬²½ÒÆÎ»Êä³ö, 0x40: 8Î»Êý¾Ý,¿É±ä²¨ÌØÂÊ, 0x80: 9Î»Êý
+             -¾Ý,¹Ì¶¨²¨ÌØÂÊ, 0xc0: 9Î»Êý¾Ý,¿É±ä²¨ÌØÂÊ
+ 396   1      //  PS  = 1;    //¸ßÓÅÏÈ¼¶ÖÐ¶Ï
+ 397   1          ES  = 1;    //ÔÊÐíÖÐ¶Ï
+ 398   1          REN = 1;    //ÔÊÐí½ÓÊÕ
+ 399   1          P_SW1 &= 0x3f;
+ 400   1          P_SW1 |= 0x80;      //UART1 switch to, 0x00: P3.0 P3.1, 0x40: P3.6 P3.7, 0x80: P1.6 P1.7 (±ØÐëÊ¹ÓÃÄÚ²¿
+             -Ê±ÖÓ)
+ 401   1      //  PCON2 |=  (1<<4);   //ÄÚ²¿¶ÌÂ·RXDÓëTXD, ×öÖÐ¼Ì, ENABLE,DISABLE
+ 402   1      
+ 403   1          B_TX1_Busy = 0;
+ 404   1          TX1_Cnt = 0;
+ 405   1          RX1_Cnt = 0;
+ 406   1          RX1_TimeOut = 0;
+ 407   1      }
+ 408          
+ 409          
+ 410          
+ 411          //========================================================================
+ 412          // º¯Êý: void   UART1_TxByte(u8 dat)
+ 413          // ÃèÊö: ·¢ËÍÒ»¸ö×Ö½Ú.
+ 414          // ²ÎÊý: ÎÞ.
+ 415          // ·µ»Ø: ÎÞ.
+ 416          // °æ±¾: V1.0, 2014-6-30
+ 417          //========================================================================
+ 418          
+ 419          void    UART1_TxByte(u8 dat)
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 8   
+
+ 420          {
+ 421   1          SBUF = dat;
+ 422   1          B_TX1_Busy = 1;
+ 423   1          while(B_TX1_Busy);
+ 424   1      }
+ 425          
+ 426          
+ 427          //========================================================================
+ 428          // º¯Êý: void UART1_int (void) interrupt UART1_VECTOR
+ 429          // ÃèÊö: UART1ÖÐ¶Ïº¯Êý¡£
+ 430          // ²ÎÊý: nine.
+ 431          // ·µ»Ø: none.
+ 432          // °æ±¾: VER1.0
+ 433          // ÈÕÆÚ: 2014-11-28
+ 434          // ±¸×¢: 
+ 435          //========================================================================
+ 436          void UART1_int (void) interrupt 4
+ 437          {
+ 438   1          if(RI)
+ 439   1          {
+ 440   2              RI = 0;
+ 441   2              if(RX1_Cnt >= UART1_BUF_LENGTH) RX1_Cnt = 0;
+ 442   2              RX1_Buffer[RX1_Cnt] = SBUF;
+ 443   2              RX1_Cnt++;
+ 444   2              RX1_TimeOut = 5;
+ 445   2          }
+ 446   1      
+ 447   1          if(TI)
+ 448   1          {
+ 449   2              TI = 0;
+ 450   2              B_TX1_Busy = 0;
+ 451   2          }
+ 452   1      }
+ 453          
+ 454          
+ 455          /*
+ 456          STC15F/L2KxxS2  ÉÈÇø·ÖÅä£¬512×Ö½Ú/ÉÈÇø£¬´Ó0x0000¿ªÊ¼¡£
+ 457          
+ 458               ÐÍºÅ        ´óÐ¡   ÉÈÇøÊý  ¿ªÊ¼µØÖ·  ½áÊøµØÖ·   MOVC¶ÁÆ«ÒÆµØÖ·
+ 459          STC15F/L2K08S2   53K   106ÉÈÇø  0x0000  ~  0xD3FF        0x2000
+ 460          STC15F/L2K16S2   45K    90ÉÈÇø  0x0000  ~  0xB3FF        0x4000
+ 461          STC15F/L2K24S2   37K    74ÉÈÇø  0x0000  ~  0x93FF        0x6000
+ 462          STC15F/L2K32S2   29K    58ÉÈÇø  0x0000  ~  0x73FF        0x8000
+ 463          STC15F/L2K40S2   21K    42ÉÈÇø  0x0000  ~  0x53FF        0xA000
+ 464          STC15F/L2K48S2   13K    26ÉÈÇø  0x0000  ~  0x33FF        0xC000
+ 465          STC15F/L2K56S2   5K     10ÉÈÇø  0x0000  ~  0x13FF        0xE000
+ 466          STC15F/L2K60S2   1K      2ÉÈÇø  0x0000  ~  0x03FF        0xF000
+ 467          
+ 468          STC15F/L2K61S2   ÎÞEPROM, Õû¸ö122ÉÈÇøµÄFLASH¶¼¿ÉÒÔ²ÁÐ´ µØÖ· 0x0000~0xF3ff.
+ 469          */
+ 470          
+ 471          #define     ISP_STANDBY()   ISP_CMD = 0     //ISP¿ÕÏÐÃüÁî£¨½ûÖ¹£©
+ 472          #define     ISP_READ()      ISP_CMD = 1     //ISP¶Á³öÃüÁî
+ 473          #define     ISP_WRITE()     ISP_CMD = 2     //ISPÐ´ÈëÃüÁî
+ 474          #define     ISP_ERASE()     ISP_CMD = 3     //ISP²Á³ýÃüÁî
+ 475          
+ 476          #define     ISP_ENABLE()    ISP_CONTR = (ISP_EN + ISP_WAIT_FREQUENCY)
+ 477          #define     ISP_DISABLE()   ISP_CONTR = 0; ISP_CMD = 0; ISP_TRIG = 0; ISP_ADDRH = 0xff; ISP_ADDRL = 0xff
+ 478          
+ 479          #define ISP_EN          (1<<7)
+ 480          #define ISP_SWBS        (1<<6)
+ 481          #define ISP_SWRST       (1<<5)
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 9   
+
+ 482          #define ISP_CMD_FAIL    (1<<4)
+ 483          #define ISP_WAIT_1MHZ   7
+ 484          #define ISP_WAIT_2MHZ   6
+ 485          #define ISP_WAIT_3MHZ   5
+ 486          #define ISP_WAIT_6MHZ   4
+ 487          #define ISP_WAIT_12MHZ  3
+ 488          #define ISP_WAIT_20MHZ  2
+ 489          #define ISP_WAIT_24MHZ  1
+ 490          #define ISP_WAIT_30MHZ  0
+ 491          
+ 492          #if (MAIN_Fosc >= 24000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_30MHZ
+              #elif (MAIN_Fosc >= 20000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_24MHZ
+              #elif (MAIN_Fosc >= 12000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_20MHZ
+              #elif (MAIN_Fosc >= 6000000L)
+ 499              #define     ISP_WAIT_FREQUENCY  ISP_WAIT_12MHZ
+ 500          #elif (MAIN_Fosc >= 3000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_6MHZ
+              #elif (MAIN_Fosc >= 2000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_3MHZ
+              #elif (MAIN_Fosc >= 1000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_2MHZ
+              #else
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_1MHZ
+              #endif
+ 509          
+ 510          
+ 511          
+ 512          //========================================================================
+ 513          // º¯Êý: void DisableEEPROM(void)
+ 514          // ÃèÊö: ½ûÖ¹EEPROM.
+ 515          // ²ÎÊý: none.
+ 516          // ·µ»Ø: none.
+ 517          // °æ±¾: V1.0, 2014-6-30
+ 518          //========================================================================
+ 519          void DisableEEPROM(void)        //½ûÖ¹·ÃÎÊEEPROM
+ 520          {
+ 521   1          ISP_CONTR = 0;              //½ûÖ¹ISP/IAP²Ù×÷
+ 522   1          ISP_CMD   = 0;              //È¥³ýISP/IAPÃüÁî
+ 523   1          ISP_TRIG  = 0;              //·ÀÖ¹ISP/IAPÃüÁîÎó´¥·¢
+ 524   1          ISP_ADDRH = 0xff;           //Ö¸Ïò·ÇEEPROMÇø£¬·ÀÖ¹Îó²Ù×÷
+ 525   1          ISP_ADDRL = 0xff;           //Ö¸Ïò·ÇEEPROMÇø£¬·ÀÖ¹Îó²Ù×÷
+ 526   1      }
+ 527          
+ 528          //========================================================================
+ 529          // º¯Êý: void   EEPROM_Trig(void)
+ 530          // ÃèÊö: ´¥·¢EEPROM²Ù×÷.
+ 531          // ²ÎÊý: none.
+ 532          // ·µ»Ø: none.
+ 533          // °æ±¾: V1.0, 2014-6-30
+ 534          //========================================================================
+ 535          void    EEPROM_Trig(void)
+ 536          {
+ 537   1          F0 = EA;    //±£´æÈ«¾ÖÖÐ¶Ï
+ 538   1          EA = 0;     //½ûÖ¹ÖÐ¶Ï, ±ÜÃâ´¥·¢ÃüÁîÎÞÐ§
+ 539   1          ISP_TRIG = 0x5A;
+ 540   1          ISP_TRIG = 0xA5;                    //ÏÈËÍ5AH£¬ÔÙËÍA5Hµ½ISP/IAP´¥·¢¼Ä´æÆ÷£¬Ã¿´Î¶¼ÐèÒªÈç´Ë
+ 541   1                                              //ËÍÍêA5Hºó£¬ISP/IAPÃüÁîÁ¢¼´±»´¥·¢Æô¶¯
+ 542   1                                              //CPUµÈ´ýIAPÍê³Éºó£¬²Å»á¼ÌÐøÖ´ÐÐ³ÌÐò¡£
+ 543   1          _nop_();
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 10  
+
+ 544   1          _nop_();
+ 545   1          EA = F0;    //»Ö¸´È«¾ÖÖÐ¶Ï
+ 546   1      }
+ 547          
+ 548          //========================================================================
+ 549          // º¯Êý: void   EEPROM_SectorErase(u16 EE_address)
+ 550          // ÃèÊö: ²Á³ýÒ»¸öÉÈÇø.
+ 551          // ²ÎÊý: EE_address:  Òª²Á³ýµÄEEPROMµÄÉÈÇøÖÐµÄÒ»¸ö×Ö½ÚµØÖ·.
+ 552          // ·µ»Ø: none.
+ 553          // °æ±¾: V1.0, 2014-6-30
+ 554          //========================================================================
+ 555          void    EEPROM_SectorErase(u16 EE_address)
+ 556          {
+ 557   1          ISP_ENABLE();                       //ÉèÖÃµÈ´ýÊ±¼ä£¬ÔÊÐíISP/IAP²Ù×÷£¬ËÍÒ»´Î¾Í¹»
+ 558   1          ISP_ERASE();                        //ºêµ÷ÓÃ, ËÍÉÈÇø²Á³ýÃüÁî£¬ÃüÁî²»Ðè¸Ä±äÊ±£¬²»ÐèÖØÐÂËÍÃüÁî
+ 559   1                                              //Ö»ÓÐÉÈÇø²Á³ý£¬Ã»ÓÐ×Ö½Ú²Á³ý£¬512×Ö½Ú/ÉÈÇø¡£
+ 560   1                                              //ÉÈÇøÖÐÈÎÒâÒ»¸ö×Ö½ÚµØÖ·¶¼ÊÇÉÈÇøµØÖ·¡£
+ 561   1          ISP_ADDRH = EE_address / 256;       //ËÍÉÈÇøµØÖ·¸ß×Ö½Ú£¨µØÖ·ÐèÒª¸Ä±äÊ±²ÅÐèÖØÐÂËÍµØÖ·£©
+ 562   1          ISP_ADDRL = EE_address % 256;       //ËÍÉÈÇøµØÖ·µÍ×Ö½Ú
+ 563   1          EEPROM_Trig();                      //´¥·¢EEPROM²Ù×÷
+ 564   1          DisableEEPROM();                    //½ûÖ¹EEPROM²Ù×÷
+ 565   1      }
+ 566          
+ 567          //========================================================================
+ 568          // º¯Êý: void EEPROM_read_n(u16 EE_address,u8 *DataAddress,u8 lenth)
+ 569          // ÃèÊö: ¶ÁN¸ö×Ö½Úº¯Êý.
+ 570          // ²ÎÊý: EE_address:  Òª¶Á³öµÄEEPROMµÄÊ×µØÖ·.
+ 571          //       DataAddress: Òª¶Á³öÊý¾ÝµÄÖ¸Õë.
+ 572          //       length:      Òª¶Á³öµÄ³¤¶È
+ 573          // ·µ»Ø: 0: Ð´ÈëÕýÈ·.  1: Ð´Èë³¤¶ÈÎª0´íÎó.  2: Ð´ÈëÊý¾Ý´íÎó.
+ 574          // °æ±¾: V1.0, 2014-6-30
+ 575          //========================================================================
+ 576          void EEPROM_read_n(u16 EE_address,u8 *DataAddress,u8 length)
+ 577          {
+ 578   1          ISP_ENABLE();                           //ÉèÖÃµÈ´ýÊ±¼ä£¬ÔÊÐíISP/IAP²Ù×÷£¬ËÍÒ»´Î¾Í¹»
+ 579   1          ISP_READ();                             //ËÍ×Ö½Ú¶ÁÃüÁî£¬ÃüÁî²»Ðè¸Ä±äÊ±£¬²»ÐèÖØÐÂËÍÃüÁî
+ 580   1          do
+ 581   1          {
+ 582   2              ISP_ADDRH = EE_address / 256;       //ËÍµØÖ·¸ß×Ö½Ú£¨µØÖ·ÐèÒª¸Ä±äÊ±²ÅÐèÖØÐÂËÍµØÖ·£©
+ 583   2              ISP_ADDRL = EE_address % 256;       //ËÍµØÖ·µÍ×Ö½Ú
+ 584   2              EEPROM_Trig();                      //´¥·¢EEPROM²Ù×÷
+ 585   2              *DataAddress = ISP_DATA;            //¶Á³öµÄÊý¾ÝËÍÍù
+ 586   2              EE_address++;
+ 587   2              DataAddress++;
+ 588   2          }while(--length);
+ 589   1      
+ 590   1          DisableEEPROM();
+ 591   1      }
+ 592          
+ 593          
+ 594          //========================================================================
+ 595          // º¯Êý: u8 EEPROM_write_n(u16 EE_address,u8 *DataAddress,u8 length)
+ 596          // ÃèÊö: Ð´N¸ö×Ö½Úº¯Êý.
+ 597          // ²ÎÊý: EE_address:  ÒªÐ´ÈëµÄEEPROMµÄÊ×µØÖ·.
+ 598          //       DataAddress: ÒªÐ´ÈëÊý¾ÝµÄÖ¸Õë.
+ 599          //       length:      ÒªÐ´ÈëµÄ³¤¶È
+ 600          // ·µ»Ø: 0: Ð´ÈëÕýÈ·.  1: Ð´Èë³¤¶ÈÎª0´íÎó.  2: Ð´ÈëÊý¾Ý´íÎó.
+ 601          // °æ±¾: V1.0, 2014-6-30
+ 602          //========================================================================
+ 603          u8  EEPROM_write_n(u16 EE_address,u8 *DataAddress,u8 length)
+ 604          {
+ 605   1          u8  i;
+C51 COMPILER V9.54   EXAMPLE_EEPROM_MULTIBYTE_WRITE                                        04/11/2016 22:54:46 PAGE 11  
+
+ 606   1          u16 j;
+ 607   1          u8  *p;
+ 608   1          
+ 609   1          if(length == 0) return 1;   //³¤¶ÈÎª0´íÎó
+ 610   1      
+ 611   1          ISP_ENABLE();                       //ÉèÖÃµÈ´ýÊ±¼ä£¬ÔÊÐíISP/IAP²Ù×÷£¬ËÍÒ»´Î¾Í¹»
+ 612   1          i = length;
+ 613   1          j = EE_address;
+ 614   1          p = DataAddress;
+ 615   1          ISP_WRITE();                            //ºêµ÷ÓÃ, ËÍ×Ö½ÚÐ´ÃüÁî
+ 616   1          do
+ 617   1          {
+ 618   2              ISP_ADDRH = EE_address / 256;       //ËÍµØÖ·¸ß×Ö½Ú£¨µØÖ·ÐèÒª¸Ä±äÊ±²ÅÐèÖØÐÂËÍµØÖ·£©
+ 619   2              ISP_ADDRL = EE_address % 256;       //ËÍµØÖ·µÍ×Ö½Ú
+ 620   2              ISP_DATA  = *DataAddress;           //ËÍÊý¾Ýµ½ISP_DATA£¬Ö»ÓÐÊý¾Ý¸Ä±äÊ±²ÅÐèÖØÐÂËÍ
+ 621   2              EEPROM_Trig();                      //´¥·¢EEPROM²Ù×÷
+ 622   2              EE_address++;                       //ÏÂÒ»¸öµØÖ·
+ 623   2              DataAddress++;                      //ÏÂÒ»¸öÊý¾Ý
+ 624   2          }while(--length);                       //Ö±µ½½áÊø
+ 625   1      
+ 626   1          EE_address = j;
+ 627   1          length = i;
+ 628   1          DataAddress = p;
+ 629   1          i = 0;
+ 630   1          ISP_READ();                             //¶ÁN¸ö×Ö½Ú²¢±È½Ï
+ 631   1          do
+ 632   1          {
+ 633   2              ISP_ADDRH = EE_address / 256;       //ËÍµØÖ·¸ß×Ö½Ú£¨µØÖ·ÐèÒª¸Ä±äÊ±²ÅÐèÖØÐÂËÍµØÖ·£©
+ 634   2              ISP_ADDRL = EE_address % 256;       //ËÍµØÖ·µÍ×Ö½Ú
+ 635   2              EEPROM_Trig();                      //´¥·¢EEPROM²Ù×÷
+ 636   2              if(*DataAddress != ISP_DATA)        //¶Á³öµÄÊý¾ÝÓëÔ´Êý¾Ý±È½Ï
+ 637   2              {
+ 638   3                  i = 2;
+ 639   3                  break;
+ 640   3              }
+ 641   2              EE_address++;
+ 642   2              DataAddress++;
+ 643   2          }while(--length);
+ 644   1      
+ 645   1          DisableEEPROM();
+ 646   1          return i;
+ 647   1      }
+ 648          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1054    ----
+   CONSTANT SIZE    =    241    ----
+   XDATA SIZE       =    149    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3      26
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

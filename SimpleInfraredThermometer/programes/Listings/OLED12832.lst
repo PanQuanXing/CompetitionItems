@@ -1,0 +1,237 @@
+C51 COMPILER V9.56.0.0   OLED12832                                                         02/21/2018 14:26:19 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE OLED12832
+OBJECT MODULE PLACED IN .\Outputs\OLED12832.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE DRIVES\OLED12832.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\USER
+                    -;.\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\OLED12832.lst) TABS(2) OBJECT(.\Outputs\OLED12832.obj)
+
+line level    source
+
+   1          #include "OLED12832.h"
+   2          void OLED_Init(){
+   3   1        _OLED_SCL_OUTPUT();
+   4   1        _OLED_SDA_OUTPUT();
+   5   1         Delay_ms(100);
+   6   1        OledSendCommand(0xAE);//关闭显示
+   7   1        
+   8   1        OledSendCommand(0x40);//---set low column address
+   9   1        OledSendCommand(0xB0);//---set high column address
+  10   1      
+  11   1        OledSendCommand(0xC8);//-not offset
+  12   1      
+  13   1        OledSendCommand(0x81);//设置对比度
+  14   1        OledSendCommand(0xff);
+  15   1      
+  16   1        OledSendCommand(0xa1);//段重定向设置
+  17   1      
+  18   1        OledSendCommand(0xa6);//
+  19   1        
+  20   1        OledSendCommand(0xa8);//设置驱动路数
+  21   1        OledSendCommand(0x1f);
+  22   1        
+  23   1        OledSendCommand(0xd3);
+  24   1        OledSendCommand(0x00);
+  25   1        
+  26   1        OledSendCommand(0xd5);
+  27   1        OledSendCommand(0xf0);
+  28   1        
+  29   1        OledSendCommand(0xd9);
+  30   1        OledSendCommand(0x22);
+  31   1        
+  32   1        OledSendCommand(0xda);
+  33   1        OledSendCommand(0x02);
+  34   1        
+  35   1        OledSendCommand(0xdb);
+  36   1        OledSendCommand(0x49);
+  37   1        
+  38   1        OledSendCommand(0x8d);
+  39   1        OledSendCommand(0x14);
+  40   1        
+  41   1        OledSendCommand(0xaf);
+  42   1        OLED_Clear();
+  43   1      }
+  44          void IIC_Start(){//此处改了一下顺序
+  45   1        OLED_SDA=1;
+  46   1        OLED_SCK=1;
+  47   1        OLED_SDA=0;
+  48   1        OLED_SCK=0;
+  49   1      }
+  50          void IIC_Stop(){
+  51   1        OLED_SDA=0;
+  52   1        OLED_SCK=1;
+  53   1        OLED_SDA=1;
+  54   1      }
+C51 COMPILER V9.56.0.0   OLED12832                                                         02/21/2018 14:26:19 PAGE 2   
+
+  55          static bit SendByte(unsigned char iicByte){
+  56   1        unsigned char i;
+  57   1        OLED_SCK=0;
+  58   1        for(i=0;i<8;i++)    
+  59   1        {
+  60   2          if(iicByte&0x80)
+  61   2            OLED_SDA=1;
+  62   2          else
+  63   2            OLED_SDA=0;
+  64   2          iicByte<<=1;
+  65   2          OLED_SCK=1;
+  66   2          OLED_SCK=0;
+  67   2        } 
+  68   1      //    _SDA_INPUT();
+  69   1        OLED_SCK=1;
+  70   1        _nop_();_nop_();
+  71   1        if(OLED_SDA)
+  72   1        {
+  73   2          OLED_SCK=0; 
+  74   2          return 0;
+  75   2        }
+  76   1        OLED_SCK=0;
+  77   1        return 1;
+  78   1      }
+  79          unsigned char OledSendCommand(unsigned char iicCommand){
+  80   1        IIC_Start();
+  81   1        //Slave address,SA0=0
+  82   1        if(!SendByte(0x78)){
+  83   2          return ADDRERROR;
+  84   2        }
+  85   1        //write command
+  86   1        if(!SendByte(0x00)){
+  87   2          return COMMANDERROR;
+  88   2        }    
+  89   1        if(!SendByte(iicCommand)){
+  90   2          return WCOMMANDERROR;
+  91   2        }
+  92   1        IIC_Stop();
+  93   1        return NONEERROR;
+  94   1      }
+  95          unsigned char OledSendData(unsigned char iicData){
+  96   1        IIC_Start();
+  97   1        //Slave address,SA0=0
+  98   1        if(!SendByte(0x78)){
+  99   2          return ADDRERROR;
+ 100   2        }
+ 101   1        //write data
+ 102   1        if(!SendByte(0x40)){
+ 103   2          return COMMANDERROR;
+ 104   2        }    
+ 105   1        if(!SendByte(iicData)){
+ 106   2          return DATAERROR;
+ 107   2        }
+ 108   1        IIC_Stop();
+ 109   1        return NONEERROR;
+ 110   1      }
+ 111          //清屏函数,清完屏,整个屏幕是黑色的!和没点亮一样!!!    
+ 112          void OLED_Clear()  
+ 113          {  
+ 114   1        unsigned char i,n;        
+ 115   1        for(i=0;i<8;i++)
+ 116   1        {  
+C51 COMPILER V9.56.0.0   OLED12832                                                         02/21/2018 14:26:19 PAGE 3   
+
+ 117   2          OledSendCommand(0xb0+i);    //设置页地址（0~7）
+ 118   2          OledSendCommand(0x00);      //设置显示位置—列低地址
+ 119   2          OledSendCommand(0x10);      //设置显示位置—列高地址   
+ 120   2          for(n=0;n<128;n++)
+ 121   2            OledSendData(0); 
+ 122   2        } //更新显示
+ 123   1      }
+ 124          void OLED_Full(){
+ 125   1        unsigned char i,n;        
+ 126   1        for(i=0;i<8;i++)  
+ 127   1        {  
+ 128   2          OledSendCommand(0xb0+i);    //设置页地址（0~7）
+ 129   2          OledSendCommand(0x00);      //设置显示位置—列低地址
+ 130   2          OledSendCommand(0x10);      //设置显示位置—列高地址   
+ 131   2          for(n=0;n<128;n++)
+ 132   2            OledSendData(1);
+ 133   2        }   
+ 134   1      }
+ 135          void OLED_Set_Pos(unsigned char page,unsigned char column){
+ 136   1        page-=1;
+ 137   1        column-=1;
+ 138   1        OledSendCommand(0xb0+page);
+ 139   1        OledSendCommand((column>>4)|0x10);
+ 140   1        OledSendCommand((column&0x0f)); 
+ 141   1      }
+ 142          void OLED_On(void){
+ 143   1        OledSendCommand(0X8D);  //SET DCDC命令
+ 144   1        OledSendCommand(0X14);  //DCDC ON
+ 145   1        OledSendCommand(0XAF);  //DISPLAY ON
+ 146   1      }
+ 147          void OLED_Off(void){
+ 148   1        OledSendCommand(0X8D);  //SET DCDC命令
+ 149   1        OledSendCommand(0X10);  //DCDC OFF
+ 150   1        OledSendCommand(0XAE);  //DISPLAY OFF
+ 151   1      }
+ 152          void Oled12832ShowByte(unsigned char page,unsigned char column,unsigned char text){
+ 153   1        OLED_Set_Pos(page,column);
+ 154   1        OledSendData(text);/*显示8x16的ASCII字到LCD上，y为页地址，x为列地址，最后为数据*/
+ 155   1      }
+ 156          
+ 157          void Oled12832DisplayAsciiString6x8(unsigned char page,unsigned char column,unsigned char * text,unsigned 
+             -char txtlen,unsigned char charINV){
+ 158   1        unsigned char i,j,k;
+ 159   1        OLED_Set_Pos(page,column);
+ 160   1        for(i=0;i<txtlen;i++)
+ 161   1        {
+ 162   2          if((text[i]>=0x20)&&(text[i]<=0x7b))    /*ASCII码字符范围32～126共95个*/
+ 163   2          {
+ 164   3            j=text[i]-0x20;     //0x20 = 32, 32为空字符，是字符表的第一个字符，此行代码计算待显示字符
+ 165   3              for(k=0;k<6;k++)
+ 166   3              {   if(charINV) 
+ 167   4                    OledSendData(~ASCII6x8[j][k]);
+ 168   4                  else
+ 169   4                    OledSendData(ASCII6x8[j][k]);/*显示8x16的ASCII字到LCD上，y为页地址，x为列地址，最后为数据*/
+ 170   4              }
+ 171   3          }
+ 172   2        }
+ 173   1      }
+ 174          
+ 175          void Oled12832DisplayAsciiString8x16(unsigned char page,unsigned char column,unsigned char * text,unsigned
+             - char txtlen,unsigned char charINV){
+ 176   1        
+C51 COMPILER V9.56.0.0   OLED12832                                                         02/21/2018 14:26:19 PAGE 4   
+
+ 177   1        unsigned char i,j,k,n;
+ 178   1        for(i=0;i<txtlen;i++)
+ 179   1        {
+ 180   2          if((text[i]>=0x20)&&(text[i]<=0x7e))    /*ASCII码字符范围32～126共95个*/
+ 181   2          {
+ 182   3            j=text[i]-0x20;     //0x20 = 32, 32为空字符，是字符表的第一个字符，此行代码计算待显示字符
+ 183   3                      //相对于第一个字符的位移。
+ 184   3            for(n=0;n<2;n++)    //需要两行显示，分上半部分和下半部分
+ 185   3            {
+ 186   4              OLED_Set_Pos(page+n,column);
+ 187   4              for(k=0;k<8;k++)
+ 188   4              {
+ 189   5                if(charINV)       
+ 190   5                  OledSendData(~ASCII8x16[j][k+8*n]);/*显示8x16的ASCII字到LCD上，y为页地址，x为列地址，最后为数据*/
+ 191   5                else
+ 192   5                  OledSendData(ASCII8x16[j][k+8*n]);/*显示8x16的ASCII字到LCD上，y为页地址，x为列地址，最后为数据*/
+ 193   5              }
+ 194   4            }
+ 195   3            column+=8;
+ 196   3          }
+ 197   2        }
+ 198   1      }
+ 199          
+ 200          void Oled12832ClearPage(unsigned char page,unsigned char len){
+ 201   1        OLED_Set_Pos(page,0);
+ 202   1        while(len--){
+ 203   2          OledSendData(0x00);
+ 204   2        }
+ 205   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    773    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      15
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

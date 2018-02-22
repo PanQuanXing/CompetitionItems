@@ -1,0 +1,51 @@
+C51 COMPILER V9.56.0.0   PQXKEYS                                                           02/21/2018 14:26:18 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE PQXKEYS
+OBJECT MODULE PLACED IN .\Outputs\PqxKeys.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE DRIVES\PqxKeys.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\USER;.
+                    -\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\PqxKeys.lst) TABS(2) OBJECT(.\Outputs\PqxKeys.obj)
+
+line level    source
+
+   1          #include "PqxKeys.h"
+   2          void initKeys(){//如果外接上拉电阻就需要调用
+   3   1        KeyUpSetting();
+   4   1        KeyDownSetting();
+   5   1        KeyOkSetting();
+   6   1      }
+   7          unsigned char KeysScan(){
+   8   1        unsigned char keyValue = 0xff , i ; //保存键值
+   9   1        //--检测按键1--//
+  10   1        if ((KeyGpio&KeyS)!= 0x07)    //检测按键K1是否按下
+  11   1        {
+  12   2      //    Delay_ms(4);  //消除抖动  
+  13   2          os_wait2(K_TMO,1);    
+  14   2          if (((KeyGpio&KeyS))!= 0x07)  //再次检测按键是否按下
+  15   2          {
+  16   3            keyValue = (KeyGpio&KeyS);
+  17   3            i = 0;
+  18   3            while ((i<50) && ((KeyGpio&KeyS) != 0x07))   //检测按键是否松开
+  19   3            {
+  20   4      //        Delay_ms(5);
+  21   4              os_wait2(K_TMO,1);     
+  22   4              i++;
+  23   4            }
+  24   3          }
+  25   2        }
+  26   1        return keyValue;
+  27   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     92    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,53 @@
+C51 COMPILER V9.56.0.0   TASKEEPROM                                                        02/21/2018 14:26:21 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE TASKEEPROM
+OBJECT MODULE PLACED IN .\Outputs\taskEEPROM.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE USER\taskEEPROM.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\USER;
+                    -.\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\taskEEPROM.lst) TABS(2) OBJECT(.\Outputs\taskEEPROM.obj)
+
+line level    source
+
+   1          #include "includes.h"
+   2          
+   3          void save2EEPROM() _task_ 5{
+   4   1        int dataWrite;
+   5   1        while(1){
+   6   2          os_wait1(K_SIG);  
+   7   2          if(writeEepromAddr<0x0400){
+   8   3            dataWrite=TempC2Data(result); 
+   9   3            EEPROM_WriteByte(writeEepromAddr,(dataWrite&0xff));
+  10   3            writeEepromAddr+=1;
+  11   3            dataWrite>>=8;
+  12   3            EEPROM_WriteByte(writeEepromAddr,(dataWrite&0xff));
+  13   3            writeEepromAddr+=1;
+  14   3          }
+  15   2          os_send_signal(0);
+  16   2        }
+  17   1      }
+  18          
+  19          void read2EEPROM() _task_ 6{
+  20   1        short dataRead;
+  21   1        while(1){
+  22   2          os_wait1(K_SIG);  
+  23   2          dataRead=EEPROM_ReadByte(readEepromAddr+1);
+  24   2          dataRead<<=8;
+  25   2          dataRead|=EEPROM_ReadByte(readEepromAddr);
+  26   2          result=Data2TempC(dataRead);
+  27   2          os_send_signal(0);
+  28   2        }
+  29   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    198    ----
+   CONSTANT SIZE    =    256    ----
+   XDATA SIZE       =   ----       4
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

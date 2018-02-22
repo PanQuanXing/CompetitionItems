@@ -1,0 +1,128 @@
+#include "STC89C5X.h"
+#include "intrins.h"
+#include "panquanxing.h"
+unsigned int startAddr=0;//用来保存初始地址的
+unsigned int inputCount=0;//保存蓝牙输入的字符的个数
+unsigned char wordCount=0;//保存在eeprom中的字符的个数
+unsigned char initializeFag=0;
+void EEPROM_Init_Zero(uint);
+void InitConfigure(void);
+void writeNewCheckCount();
+uchar readLastDataOnSectorOne2(){//不能在中断中使用此函数
+	uchar checkCount;
+	uint sectorOne=0x2000;
+	EA=0;
+	while(sectorOne<=0x21ff&&EEPROM_ReadByte(sectorOne)!=0xff){
+		++sectorOne;
+	}
+	if(sectorOne>0x2000){
+		checkCount=EEPROM_ReadByte(sectorOne-1);
+	}else{
+		checkCount=0;//null value for write!
+	}
+	EA=1;
+	return checkCount;
+}
+void main(void){
+	initializeFag=EEPROM_ReadByte(0x2e00);//第八扇区的开始字节保存系统初始化的标志
+	if(initializeFag!=0xab){
+		EEPROM_EraseSector(0x2200);//擦除第二扇区
+		EEPROM_Init_Zero(0x2200);//将第二扇区的所有单元初始化为0x00
+		EEPROM_EraseSector(0x2400);//擦除第三扇区
+		EEPROM_EraseSector(0x2600);//擦除第四扇区
+		EEPROM_EraseSector(0x2800);//擦除第五扇区
+		EEPROM_EraseSector(0x2a00);//擦除第六扇区
+		EEPROM_Init_Zero(0x2a00);//将第六扇区的所有单元初始化为0x00
+		EEPROM_EraseSector(0x2e00);//擦除第八扇区
+		EEPROM_WriteByte(0x2e00,0xab);//
+	}
+	//设置蓝牙接收波特率为9600Hz@22.1184MHz
+	TMOD&=0x0f;
+	TMOD|=0x20;//设置TMOD为0x20
+	TH1=0xfa;
+	TL1=0xfa;
+	SCON=0x70;
+	ET1=0;//禁止定时器1的中断
+	TR1=1;//启动计时器一开始计时
+	InitConfigure();
+	wordCount=readLastDataOnSectorOne();
+	while(1){
+		//P0=UART_EEPROM_ReadByte(0x2400);
+		P0=inputCount;
+	}
+}
+void InitConfigure(void){
+	ES=1;
+	EA=1;
+}
+void EEPROM_Init_Zero(uint startAddr){
+	uchar num=512;//一个扇区一共512个字节
+	ISP_CONTR=0x81;
+	ISP_CMD=0x02;
+	while(num--){
+		ISP_ADDRL=startAddr;
+		ISP_ADDRH=startAddr>>8;
+		ISP_DATA=0x00;//送数据0x00
+		ISP_TRIG();
+		_nop_();
+		++startAddr;//地址自增1
+	}
+	disableEEPROM();
+}
+//可能由于本人的技术问题，此函数只能定义在此，定义到另外的文件会无法写入EEPROM
+void writeNewCheckCount(){	
+	uint sectorOne=0x2000;
+	EA=0;
+	while(sectorOne<=0x21ff&&EEPROM_ReadByte(sectorOne)!=0xff){
+		++sectorOne;
+	}
+		//这里可以通过而且sectorOne会每次自增1
+	if(sectorOne>0x21ff){
+		EEPROM_EraseSector(0x2000);
+		EEPROM_WriteByte(0x2000,SBUF);//这里只能用SBUF,或者是指针,因为参数变量在不同的c文件，h文件不能传递太多次，容易造成无法接收到变量
+	}else{
+		EEPROM_WriteByte(sectorOne,SBUF);
+	}
+}
+
+void chuanKou() interrupt 4 using 1{
+	uchar num=0;
+	if(!inputCount){
+		startAddr=0x2400;//数据的
+		writeNewCheckCount();//先把计数保存起来
+		wordCount=SBUF;//最多96个字符，即可以装载96个英文字符，48个汉字
+		inputCount=wordCount;//每个字符包含16个字节的字模数据
+		inputCount<<=4;
+		UART_EEPROM_EraseSector(0x2400);//擦除第三扇区
+		UART_EEPROM_EraseSector(0x2600);//擦除第四扇区
+		UART_EEPROM_EraseSector(0x2800);//擦除第五扇区
+		RI=0;
+		return;
+	}else{
+		--inputCount;
+		UART_EEPROM_WriteByte(startAddr++,SBUF);//写数据，每写一个字节地址自增1	
+		//将数据尾部加上5*2*16个0x00数据
+		if(inputCount==0&&startAddr<0x2a00){
+				if((startAddr-0x2a00)>0xa0){
+					num=0xa0;
+				}else{
+					num=(uchar)(startAddr-0x2a00);
+				}
+				EA=0;
+				ISP_CONTR=0x81;
+				ISP_CMD=0x02;
+				while(num--){
+					ISP_ADDRL=startAddr;
+					ISP_ADDRH=startAddr>>8;
+					ISP_DATA=0x00;//送数据0x00
+					ISP_TRIG();
+					_nop_();
+					++startAddr;//地址自增1
+				}
+				disableEEPROM();
+				EA=1;
+		}
+		RI=0;
+		return;
+	}
+}

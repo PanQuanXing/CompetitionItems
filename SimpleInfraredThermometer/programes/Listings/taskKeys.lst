@@ -1,0 +1,243 @@
+C51 COMPILER V9.56.0.0   TASKKEYS                                                          02/21/2018 14:26:20 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE TASKKEYS
+OBJECT MODULE PLACED IN .\Outputs\taskKeys.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE USER\taskKeys.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\USER;.\
+                    -RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\taskKeys.lst) TABS(2) OBJECT(.\Outputs\taskKeys.obj)
+
+line level    source
+
+   1          #include "includes.h"
+   2          
+   3          void ScanKeyTask(void) _task_ 1{
+   4   1        unsigned char keyValue;
+   5   1        while(1){
+   6   2          keyValue=KeysScan();
+   7   2          if(keyValue!=0xff){
+   8   3            keyValue=keyValue|(pageItem<<4);
+   9   3            switch(keyValue){
+  10   4              case 0x16://keyup
+  11   4                if(homeItem>1)
+  12   4                  homeItem-=1;
+  13   4                else
+  14   4                  homeItem=2;
+  15   4                os_send_signal(0);
+  16   4                break;
+  17   4              case 0x15://keydown
+  18   4                if(homeItem<2)
+  19   4                  homeItem+=1;
+  20   4                else
+  21   4                  homeItem=1;
+  22   4                os_send_signal(0);
+  23   4                break;
+  24   4              case 0x13://keyok
+  25   4                pageItem+=homeItem;
+  26   4                os_send_signal(0);
+  27   4                break;
+  28   4              
+  29   4              case 0x26://keyup
+  30   4                if(goItem>0)
+  31   4                  goItem-=1;
+  32   4                else
+  33   4                  goItem=3;
+  34   4                os_send_signal(0);
+  35   4                break;
+  36   4              case 0x25://keydown
+  37   4                if(goItem<3)
+  38   4                  goItem+=1;
+  39   4                else
+  40   4                  goItem=0;
+  41   4                os_send_signal(0);
+  42   4                break;
+  43   4              case 0x23://keyok
+  44   4                  if(goItem==0){
+  45   5                    pageItem=1;
+  46   5                    os_send_signal(0);
+  47   5                  }else if(goItem==1){
+  48   5                    //擦除EEPROM
+  49   5                    EEPROM_EraseSector(MINADDR);
+  50   5                    EEPROM_EraseSector(SECONDADDR);
+  51   5                    writeEepromAddr=0x0000;//地址置0
+  52   5                    historyCount=0;
+  53   5                    pageItem=4;
+  54   5                    isGeneral=0;
+C51 COMPILER V9.56.0.0   TASKKEYS                                                          02/21/2018 14:26:20 PAGE 2   
+
+  55   5                    os_send_signal(4);
+  56   5                  }else if(goItem==2){
+  57   5                    pageItem=5;
+  58   5                    isGeneral=1;
+  59   5                    os_send_signal(4);
+  60   5                  }else if(goItem==3){//读取history
+  61   5                    readEepromAddr=0x0000;
+  62   5                    historyNum=0;
+  63   5                    pageItem=6;
+  64   5                    os_send_signal(6);
+  65   5                  }
+  66   4                break;
+  67   4              
+  68   4              case 0x36://keyup
+  69   4                if(setItem>0)
+  70   4                  setItem-=1;
+  71   4                else
+  72   4                  setItem=3;        
+  73   4                os_send_signal(0);
+  74   4                break;
+  75   4              case 0x35://keydown
+  76   4                if(setItem<3)
+  77   4                  setItem+=1;
+  78   4                else
+  79   4                  setItem=0;
+  80   4                os_send_signal(0);
+  81   4                break;
+  82   4              case 0x33://keyok
+  83   4                if(setItem==0){
+  84   5                    pageItem=1;
+  85   5                    os_send_signal(0);
+  86   5                  }else if(setItem==1){//改变lower
+  87   5                    pageItem=7;
+  88   5                    lowerValue=-40;
+  89   5                    os_send_signal(0);
+  90   5                  }else if(setItem==2){//改变upper
+  91   5                    upperValue=125;
+  92   5                    pageItem=8;
+  93   5                    os_send_signal(0);
+  94   5                  }else if(setItem==3){
+  95   5                    emissivity=10;
+  96   5                    pageItem=9;
+  97   5                    os_send_signal(0);
+  98   5                  }         
+  99   4                break;
+ 100   4                  
+ 101   4              case 0x46:
+ 102   4      //          upAction(&HuItem);
+ 103   4                if(HuItem>0)
+ 104   4                  HuItem-=1;
+ 105   4                else
+ 106   4                  HuItem=1;
+ 107   4                os_send_signal(0);
+ 108   4                break;
+ 109   4              case 0x45:
+ 110   4                historyCount+=1;
+ 111   4                os_send_signal(4);
+ 112   4                break;
+ 113   4              case 0x43://ok
+ 114   4                if(HuItem==0){
+ 115   5                  pageItem=2;
+ 116   5                  os_send_signal(0);
+C51 COMPILER V9.56.0.0   TASKKEYS                                                          02/21/2018 14:26:20 PAGE 3   
+
+ 117   5                }
+ 118   4                break;
+ 119   4                
+ 120   4              case 0x56:
+ 121   4      ////          upAction(&NoItem);
+ 122   4      //        NoItem=0;
+ 123   4                if(NoItem>0)
+ 124   4                  NoItem-=1;
+ 125   4                else
+ 126   4                  NoItem=1;
+ 127   4                os_send_signal(0);
+ 128   4                break;
+ 129   4              case 0x55:
+ 130   4                os_send_signal(4);
+ 131   4                break;
+ 132   4              case 0x53:
+ 133   4                if(NoItem==0){
+ 134   5                  pageItem=2;
+ 135   5                  os_send_signal(0);
+ 136   5                }
+ 137   4                break;
+ 138   4              
+ 139   4              case 0x66://up
+ 140   4                if(readEepromAddr<0x0400&&historyCount>0){
+ 141   5                  historyCount-=1;
+ 142   5                  readEepromAddr+=2;
+ 143   5                  historyNum+=1;
+ 144   5                  os_send_signal(6);
+ 145   5                }
+ 146   4                break;
+ 147   4              case 0x65://down
+ 148   4                if(readEepromAddr>0x0000){
+ 149   5                  historyCount+=1;
+ 150   5                  readEepromAddr-=2;
+ 151   5                  historyNum-=1;
+ 152   5                  os_send_signal(6);
+ 153   5                }
+ 154   4                break;
+ 155   4              case 0x63:
+ 156   4                pageItem=2;
+ 157   4                os_send_signal(0);
+ 158   4                break;
+ 159   4              //改变lower
+ 160   4              case 0x76:
+ 161   4                lowerValue+=1;
+ 162   4              os_send_signal(0);
+ 163   4                break;
+ 164   4              case 0x75:
+ 165   4                lowerValue-=1;
+ 166   4              os_send_signal(0);
+ 167   4                break;
+ 168   4              case 0x73:
+ 169   4                isGeneral=3;
+ 170   4                pageItem=3;
+ 171   4                os_send_signal(4);
+ 172   4                break;
+ 173   4              //改变upper
+ 174   4              case 0x86:
+ 175   4                upperValue+=1;
+ 176   4              os_send_signal(0);
+ 177   4                break;
+ 178   4              case 0x85:
+C51 COMPILER V9.56.0.0   TASKKEYS                                                          02/21/2018 14:26:20 PAGE 4   
+
+ 179   4                upperValue-=1;
+ 180   4              os_send_signal(0);
+ 181   4                break;
+ 182   4              case 0x83:
+ 183   4                isGeneral=4;
+ 184   4                pageItem=3;
+ 185   4                os_send_signal(4);
+ 186   4                break;
+ 187   4              
+ 188   4              case 0x96:
+ 189   4                if(emissivity<10){
+ 190   5                  emissivity+=1;
+ 191   5                }
+ 192   4                os_send_signal(0);
+ 193   4                break;
+ 194   4              case 0x95:
+ 195   4                if(emissivity>0){
+ 196   5                  emissivity-=1;
+ 197   5                }
+ 198   4                os_send_signal(0);
+ 199   4                break;
+ 200   4              case 0x93://ok
+ 201   4                isGeneral=2;
+ 202   4                pageItem=3;
+ 203   4                os_send_signal(4);
+ 204   4                break;
+ 205   4              
+ 206   4              default:
+ 207   4                break;
+ 208   4            }
+ 209   3            
+ 210   3          }
+ 211   2          os_switch_task();
+ 212   2        }
+ 213   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    839    ----
+   CONSTANT SIZE    =    256    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

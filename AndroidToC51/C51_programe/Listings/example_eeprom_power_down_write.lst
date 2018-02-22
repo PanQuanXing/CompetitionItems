@@ -1,0 +1,548 @@
+C51 COMPILER V9.54   EXAMPLE_EEPROM_POWER_DOWN_WRITE                                       04/11/2016 22:54:47 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE EXAMPLE_EEPROM_POWER_DOWN_WRITE
+OBJECT MODULE PLACED IN .\Objects\example_eeprom_power_down_write.obj
+COMPILER INVOKED BY: D:\Program Files (x86)\Keil_v5\C51\BIN\C51.EXE example_eeprom_power_down_write.c OPTIMIZE(8,SPEED) 
+                    -BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\example_eeprom_power_down_write.lst) TABS(2) OBJECT(.\Objects\example_eeprom_
+                    -power_down_write.obj)
+
+line level    source
+
+   1          /*---------------------------------------------------------------------*/
+   2          /* --- STC MCU Limited ------------------------------------------------*/
+   3          /* --- STC 1T Series MCU Demo Programme -------------------------------*/
+   4          /* --- Mobile: (86)13922805190 ----------------------------------------*/
+   5          /* --- Fax: 86-0513-55012956,55012947,55012969 -----------------------*/
+   6          /* --- Tel: 86-0513-55012928,55012929,55012966 ------------------------*/
+   7          /* --- Web: www.STCMCU.com --------------------------------------------*/
+   8          /* --- Web: www.GXWMCU.com --------------------------------------------*/
+   9          /* --- QQ:  800003751 -------------------------------------------------*/
+  10          /* Èç¹ûÒªÔÚ³ÌÐòÖÐÊ¹ÓÃ´Ë´úÂë,ÇëÔÚ³ÌÐòÖÐ×¢Ã÷Ê¹ÓÃÁËSTCµÄ×ÊÁÏ¼°³ÌÐò        */
+  11          /*---------------------------------------------------------------------*/
+  12          
+  13          
+  14          /*************  ±¾³ÌÐò¹¦ÄÜËµÃ÷  **************
+  15          
+  16          ÓÃSTCµÄMCUµÄIO·½Ê½¿ØÖÆ74HC595Çý¶¯8Î»ÊýÂë¹Ü¡£
+  17          
+  18          ÓÃ»§¿ÉÒÔÐÞ¸ÄºêÀ´Ñ¡ÔñÊ±ÖÓÆµÂÊ.
+  19          
+  20          Ê¹ÓÃTimer0µÄ16Î»×Ô¶¯ÖØ×°À´²úÉú1ms½ÚÅÄ,³ÌÐòÔËÐÐÓÚÕâ¸ö½ÚÅÄÏÂ, ÓÃ»§ÐÞ¸ÄMCUÖ÷Ê±ÖÓÆµÂÊÊ±,×Ô¶¯¶¨Ê±ÓÚ1ms.
+  21          
+  22          
+  23          ±¾Àý³ÌÊ¹ÓÃ5V°æ±¾µÄIAP15F2K61S2»òSTC15F2KxxS2¡£ÓÃ»§¿ÉÒÔÔÚ"ÓÃ»§¶¨Òåºê"ÖÐ°´¾ßÌåµÄMCUÐÞ¸Äµôµç±£´æµÄEEPROMµØÖ·¡
+             -£
+  24          
+  25          ÏÔÊ¾Ð§¹ûÎª: ÉÏµçºóÏÔÊ¾Ãë¼ÆÊý, ¼ÆÊý·¶Î§Îª0~10000£¬ÏÔÊ¾ÔÚÓÒ±ßµÄ5¸öÊýÂë¹Ü.
+  26          
+  27          µ±µôµçºó£¬MCU½øÈëµÍÑ¹ÖÐ¶Ï£¬¶ÔÃë¼ÆÊý½øÐÐ±£´æ¡£MCUÉÏµçÊ±¶Á³öÃë¼ÆÊý¼ÌÐøÏÔÊ¾¡£
+  28          
+  29          ÓÃ»§¿ÉÒÔÔÚ"ÓÃ»§¶¨Òåºê"ÖÐÑ¡ÔñÂË²¨µçÈÝ´ó»¹ÊÇÐ¡¡£
+  30          ´óµÄµçÈÝ(±ÈÈç1000uF)£¬Ôòµôµçºó±£³ÖµÄÊ±¼ä³¤£¬¿ÉÒÔÔÚµÍÑ¹ÖÐ¶ÏÖÐ²Á³ýºó(ÐèÒª20¶àmsÊ±¼ä)È»ºóÐ´Èë¡£
+  31          Ð¡µÄµçÈÝ£¬Ôòµôµçºó±£³ÖµÄÊ±¼ä¶Ì, Ôò±ØÐëÔÚÖ÷³ÌÐò³õÊ¼»¯Ê±ÏÈ²Á³ý.
+  32          
+  33          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  34          ×¢Òâ£ºÏÂÔØÊ±£¬ÏÂÔØ½çÃæ"Ó²¼þÑ¡Ïî"ÖÐÏÂÃæµÄÏîÒª¹Ì¶¨ÈçÏÂÉèÖÃ:
+  35          
+  36          ²»¹´Ñ¡  ÔÊÐíµÍÑ¹¸´Î»(½ûÖ¹µÍÑ¹ÖÐ¶Ï)
+  37          
+  38                  µÍÑ¹¼ì²âµçÑ¹ 4.64V
+  39          
+  40          ²»¹´Ñ¡  µÍÑ¹Ê±½ûÖ¹EEPROM²Ù×÷.
+  41          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  42          
+  43          
+  44          ******************************************/
+  45          
+  46          
+  47          #include    "reg51.h"
+  48          #include    "intrins.h"
+  49          
+  50          #define     MAIN_Fosc       11059200L   //¶¨ÒåÖ÷Ê±ÖÓ
+  51          
+  52          #define     Timer0_16bitAutoReload()    TMOD &= ~0x03                   //16Î»×Ô¶¯ÖØ×°
+C51 COMPILER V9.54   EXAMPLE_EEPROM_POWER_DOWN_WRITE                                       04/11/2016 22:54:47 PAGE 2   
+
+  53          #define     Timer0_16bit()              TMOD  = (TMOD & ~0x03) | 0x01   //16Î»
+  54          #define     Timer0_8bitAutoReload()     TMOD  = (TMOD & ~0x03) | 0x02   //8Î»×Ô¶¯ÖØ×°
+  55          #define     Timer0_16bitAutoRL_NoMask() TMOD |=  0x03       //16Î»×Ô¶¯ÖØ×°²»¿ÉÆÁ±ÎÖÐ¶Ï
+  56          #define     Timer0_AsCounterP32()       TMOD |=  4      //Ê±Æ÷0ÓÃ×ö¼ÆÊýÆ÷
+  57          #define     Timer0_AsTimer()            TMOD &= ~4      //Ê±Æ÷0ÓÃ×ö¶¨Ê±Æ÷
+  58          #define     Timer0_ExtControlP34()      TMOD |=  4      //Ê±Æ÷0ÓÉÍâ²¿INT0¸ßµçÆ½ÔÊÐí¶¨Ê±¼ÆÊý
+  59          #define     Timer0_Run()                TR0 = 1             //ÔÊÐí¶¨Ê±Æ÷0¼ÆÊý
+  60          #define     Timer0_Stop()               TR0 = 0             //½ûÖ¹¶¨Ê±Æ÷0¼ÆÊý
+  61          #define     Timer0_InterruptEnable()    ET0 = 1             //ÔÊÐíTimer1ÖÐ¶Ï.
+  62          #define     Timer0_InterruptDisable()   ET0 = 0             //½ûÖ¹Timer1ÖÐ¶Ï.
+  63          #define     Timer0_1T()                 AUXR |=  (1<<7) //Timer0 clodk = fo
+  64          #define     Timer0_12T()                AUXR &= ~(1<<7) //Timer0 clodk = fo/12  12·ÖÆµ, default
+  65          #define     Timer0_Load(n)      TH0 = (n) / 256,    TL0 = (n) % 256
+  66          
+  67          typedef     unsigned char   u8;
+  68          typedef     unsigned int    u16;
+  69          typedef     unsigned long   u32;
+  70          
+  71          sfr TH2  = 0xD6;
+  72          sfr TL2  = 0xD7;
+  73          sfr IE2   = 0xAF;
+  74          sfr INT_CLKO = 0x8F;
+  75          sfr AUXR = 0x8E;
+  76          sfr AUXR1 = 0xA2;
+  77          sfr P_SW1 = 0xA2;
+  78          sfr P_SW2 = 0xBA;
+  79          sfr S2CON = 0x9A;
+  80          sfr S2BUF = 0x9B;
+  81          
+  82          sfr ADC_CONTR = 0xBC;   //´øADÏµÁÐ
+  83          sfr ADC_RES   = 0xBD;   //´øADÏµÁÐ
+  84          sfr ADC_RESL  = 0xBE;   //´øADÏµÁÐ
+  85          sfr P1ASF = 0x9D;   //Ö»Ð´£¬Ä£ÄâÊäÈë(AD»òLVD)Ñ¡Ôñ
+  86          
+  87          sfr ISP_DATA  = 0xC2;
+  88          sfr ISP_ADDRH = 0xC3;
+  89          sfr ISP_ADDRL = 0xC4;
+  90          sfr ISP_CMD   = 0xC5;
+  91          sfr ISP_TRIG  = 0xC6;
+  92          sfr ISP_CONTR = 0xC7;
+  93          
+  94          #define     ISP_STANDBY()   ISP_CMD = 0     //ISP¿ÕÏÐÃüÁî£¨½ûÖ¹£©
+  95          #define     ISP_READ()      ISP_CMD = 1     //ISP¶Á³öÃüÁî
+  96          #define     ISP_WRITE()     ISP_CMD = 2     //ISPÐ´ÈëÃüÁî
+  97          #define     ISP_ERASE()     ISP_CMD = 3     //ISP²Á³ýÃüÁî
+  98          
+  99          #define ISP_EN          (1<<7)
+ 100          #define ISP_SWBS        (1<<6)
+ 101          #define ISP_SWRST       (1<<5)
+ 102          #define ISP_CMD_FAIL    (1<<4)
+ 103          #define ISP_WAIT_1MHZ   7
+ 104          #define ISP_WAIT_2MHZ   6
+ 105          #define ISP_WAIT_3MHZ   5
+ 106          #define ISP_WAIT_6MHZ   4
+ 107          #define ISP_WAIT_12MHZ  3
+ 108          #define ISP_WAIT_20MHZ  2
+ 109          #define ISP_WAIT_24MHZ  1
+ 110          #define ISP_WAIT_30MHZ  0
+ 111          
+ 112          #if (MAIN_Fosc >= 24000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_30MHZ
+              #elif (MAIN_Fosc >= 20000000L)
+C51 COMPILER V9.54   EXAMPLE_EEPROM_POWER_DOWN_WRITE                                       04/11/2016 22:54:47 PAGE 3   
+
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_24MHZ
+              #elif (MAIN_Fosc >= 12000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_20MHZ
+              #elif (MAIN_Fosc >= 6000000L)
+ 119              #define     ISP_WAIT_FREQUENCY  ISP_WAIT_12MHZ
+ 120          #elif (MAIN_Fosc >= 3000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_6MHZ
+              #elif (MAIN_Fosc >= 2000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_3MHZ
+              #elif (MAIN_Fosc >= 1000000L)
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_2MHZ
+              #else
+                  #define     ISP_WAIT_FREQUENCY  ISP_WAIT_1MHZ
+              #endif
+ 129          
+ 130          #define     ISP_TRIG()  ISP_TRIG = 0x5A,    ISP_TRIG = 0xA5     //ISP´¥·¢ÃüÁî
+ 131          
+ 132          sfr P4   = 0xC0;
+ 133          sfr P5   = 0xC8;
+ 134          sfr P6   = 0xE8;
+ 135          sfr P7   = 0xF8;
+ 136          sfr P1M1 = 0x91;    //PxM1.n,PxM0.n     =00--->Standard,    01--->push-pull
+ 137          sfr P1M0 = 0x92;    //                  =10--->pure input,  11--->open drain
+ 138          sfr P0M1 = 0x93;
+ 139          sfr P0M0 = 0x94;
+ 140          sfr P2M1 = 0x95;
+ 141          sfr P2M0 = 0x96;
+ 142          sfr P3M1 = 0xB1;
+ 143          sfr P3M0 = 0xB2;
+ 144          sfr P4M1 = 0xB3;
+ 145          sfr P4M0 = 0xB4;
+ 146          sfr P5M1 = 0xC9;
+ 147          sfr P5M0 = 0xCA;
+ 148          sfr P6M1 = 0xCB;
+ 149          sfr P6M0 = 0xCC;
+ 150          sfr P7M1 = 0xE1;
+ 151          sfr P7M0 = 0xE2;
+ 152          
+ 153          sbit P00 = P0^0;
+ 154          sbit P01 = P0^1;
+ 155          sbit P02 = P0^2;
+ 156          sbit P03 = P0^3;
+ 157          sbit P04 = P0^4;
+ 158          sbit P05 = P0^5;
+ 159          sbit P06 = P0^6;
+ 160          sbit P07 = P0^7;
+ 161          sbit P10 = P1^0;
+ 162          sbit P11 = P1^1;
+ 163          sbit P12 = P1^2;
+ 164          sbit P13 = P1^3;
+ 165          sbit P14 = P1^4;
+ 166          sbit P15 = P1^5;
+ 167          sbit P16 = P1^6;
+ 168          sbit P17 = P1^7;
+ 169          sbit P20 = P2^0;
+ 170          sbit P21 = P2^1;
+ 171          sbit P22 = P2^2;
+ 172          sbit P23 = P2^3;
+ 173          sbit P24 = P2^4;
+ 174          sbit P25 = P2^5;
+ 175          sbit P26 = P2^6;
+ 176          sbit P27 = P2^7;
+C51 COMPILER V9.54   EXAMPLE_EEPROM_POWER_DOWN_WRITE                                       04/11/2016 22:54:47 PAGE 4   
+
+ 177          sbit P30 = P3^0;
+ 178          sbit P31 = P3^1;
+ 179          sbit P32 = P3^2;
+ 180          sbit P33 = P3^3;
+ 181          sbit P34 = P3^4;
+ 182          sbit P35 = P3^5;
+ 183          sbit P36 = P3^6;
+ 184          sbit P37 = P3^7;
+ 185          sbit P40 = P4^0;
+ 186          sbit P41 = P4^1;
+ 187          sbit P42 = P4^2;
+ 188          sbit P43 = P4^3;
+ 189          sbit P44 = P4^4;
+ 190          sbit P45 = P4^5;
+ 191          sbit P46 = P4^6;
+ 192          sbit P47 = P4^7;
+ 193          sbit P50 = P5^0;
+ 194          sbit P51 = P5^1;
+ 195          sbit P52 = P5^2;
+ 196          sbit P53 = P5^3;
+ 197          sbit P54 = P5^4;
+ 198          sbit P55 = P5^5;
+ 199          sbit P56 = P5^6;
+ 200          sbit P57 = P5^7;
+ 201          
+ 202          sbit ELVD = IE^6;   //µÍÑ¹¼à²âÖÐ¶ÏÔÊÐíÎ»
+ 203          sbit PLVD   = IP^6;
+ 204          
+ 205          #define DIS_DOT     0x20
+ 206          #define DIS_BLACK   0x10
+ 207          #define DIS_        0x11
+ 208          
+ 209          
+ 210          /****************************** ÓÃ»§¶¨Òåºê ***********************************/
+ 211          
+ 212          #define     LargeCapacitor  0   //0: ÂË²¨µçÈÝ±È½ÏÐ¡,  1: ÂË²¨µçÈÝ±È½Ï´ó
+ 213          
+ 214          #define     EE_ADDRESS  0x8000  //±£´æµÄµØÖ·
+ 215          
+ 216          #define     Timer0_Reload   (65536UL -(MAIN_Fosc / 1000))       //Timer 0 ÖÐ¶ÏÆµÂÊ, 1000´Î/Ãë
+ 217          
+ 218          /*****************************************************************************/
+ 219          
+ 220          
+ 221          
+ 222          
+ 223          
+ 224          
+ 225          /*************  ±¾µØ³£Á¿ÉùÃ÷    **************/
+ 226          u8 code t_display[]={                       //±ê×¼×Ö¿â
+ 227          //   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+ 228              0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71,
+ 229          //black  -     H    J    K    L    N    o   P    U     t    G    Q    r   M    y
+ 230              0x00,0x40,0x76,0x1E,0x70,0x38,0x37,0x5C,0x73,0x3E,0x78,0x3d,0x67,0x50,0x37,0x6e,
+ 231              0xBF,0x86,0xDB,0xCF,0xE6,0xED,0xFD,0x87,0xFF,0xEF,0x46};    //0. 1. 2. 3. 4. 5. 6. 7. 8. 9. -1
+ 232          
+ 233          u8 code T_COM[]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};      //Î»Âë
+ 234          
+ 235          
+ 236          
+ 237          sbit    P_HC595_SER   = P4^0;   //pin 14    SER     data input
+ 238          sbit    P_HC595_RCLK  = P5^4;   //pin 12    RCLk    store (latch) clock
+C51 COMPILER V9.54   EXAMPLE_EEPROM_POWER_DOWN_WRITE                                       04/11/2016 22:54:47 PAGE 5   
+
+ 239          sbit    P_HC595_SRCLK = P4^3;   //pin 11    SRCLK   Shift data clock
+ 240          
+ 241          u8  LED8[8];        //ÏÔÊ¾»º³å
+ 242          u8  display_index;  //ÏÔÊ¾Î»Ë÷Òý
+ 243          bit B_1ms;          //1ms±êÖ¾
+ 244          u16 msecond;
+ 245          
+ 246          u16 Test_cnt;   //²âÊÔÓÃµÄÃë¼ÆÊý±äÁ¿
+ 247          u8  tmp[2];     //Í¨ÓÃÊý×é
+ 248          
+ 249          void    Display(void);
+ 250          void    DisableEEPROM(void);
+ 251          void    EEPROM_read_n(u16 EE_address,u8 *DataAddress,u16 number);
+ 252          void    EEPROM_write_n(u16 EE_address,u8 *DataAddress,u16 number);
+ 253          void    EEPROM_SectorErase(u16 EE_address);
+ 254          
+ 255          
+ 256          
+ 257          /********************** Ö÷º¯Êý ************************/
+ 258          void main(void)
+ 259          {
+ 260   1          u8  i;
+ 261   1          
+ 262   1          P0M1 = 0;   P0M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 263   1          P1M1 = 0;   P1M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 264   1          P2M1 = 0;   P2M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 265   1          P3M1 = 0;   P3M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 266   1          P4M1 = 0;   P4M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 267   1          P5M1 = 0;   P5M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 268   1          P6M1 = 0;   P6M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 269   1          P7M1 = 0;   P7M0 = 0;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+ 270   1      
+ 271   1          display_index = 0;
+ 272   1          for(i=0; i<8; i++)  LED8[i] = DIS_BLACK;    //È«²¿ÏûÒþ
+ 273   1          
+ 274   1          Timer0_1T();
+ 275   1          Timer0_AsTimer();
+ 276   1          Timer0_16bitAutoReload();
+ 277   1          Timer0_Load(Timer0_Reload);
+ 278   1          Timer0_InterruptEnable();
+ 279   1          Timer0_Run();
+ 280   1          EA = 1;     //´ò¿ª×ÜÖÐ¶Ï
+ 281   1          
+ 282   1          for(msecond=0; msecond < 200; ) //ÑÓÊ±200ms
+ 283   1          {
+ 284   2              if(B_1ms)   //1msµ½
+ 285   2              {
+ 286   3                  B_1ms = 0;
+ 287   3                  msecond ++;
+ 288   3              }
+ 289   2          }
+ 290   1      
+ 291   1          EEPROM_read_n(EE_ADDRESS,tmp,2);        //¶Á³ö2×Ö½Ú
+ 292   1          Test_cnt = ((u16)tmp[0] << 8) + tmp[1]; //Ãë¼ÆÊý
+ 293   1          if(Test_cnt > 10000)    Test_cnt = 0;   //Ãë¼ÆÊý·¶Î§Îª0~10000
+ 294   1          
+ 295   1          #if (LargeCapacitor == 0)   //ÂË²¨µçÈÝ±È½ÏÐ¡£¬µçÈÝ±£³ÖÊ±¼ä±È½Ï¶Ì£¬ÔòÏÈ²Á³ý
+ 296   1              EEPROM_SectorErase(EE_ADDRESS); //²Á³ýÒ»¸öÉÈÇø
+ 297   1          #endif
+ 298   1          
+ 299   1          Display();      //ÏÔÊ¾Ãë¼ÆÊý
+ 300   1          
+C51 COMPILER V9.54   EXAMPLE_EEPROM_POWER_DOWN_WRITE                                       04/11/2016 22:54:47 PAGE 6   
+
+ 301   1          PCON = PCON & ~(1<<5);  //µÍÑ¹¼ì²â±êÖ¾Çå0
+ 302   1          ELVD = 1;   //µÍÑ¹¼à²âÖÐ¶ÏÔÊÐí
+ 303   1          PLVD = 1;   //µÍÑ¹ÖÐ¶Ï ÓÅÏÈ¼¶¸ß
+ 304   1      
+ 305   1          while(1)
+ 306   1          {
+ 307   2              if(B_1ms)   //1msµ½
+ 308   2              {
+ 309   3                  B_1ms = 0;
+ 310   3                  if(++msecond >= 1000)   //1Ãëµ½
+ 311   3                  {
+ 312   4                      msecond = 0;        //Çå1000ms¼ÆÊý
+ 313   4                      Test_cnt++;         //Ãë¼ÆÊý+1
+ 314   4                      if(Test_cnt > 10000)    Test_cnt = 0;   //Ãë¼ÆÊý·¶Î§Îª0~10000
+ 315   4                      Display();          //ÏÔÊ¾Ãë¼ÆÊý
+ 316   4                  }
+ 317   3      
+ 318   3              }
+ 319   2          }
+ 320   1      } 
+ 321          /**********************************************/
+ 322          
+ 323          /********************** µÍÑ¹ÖÐ¶Ïº¯Êý ************************/
+ 324          void    LVD_Routine(void) interrupt 6
+ 325          {
+ 326   1          u8  i;
+ 327   1      
+ 328   1          P_HC595_SER = 0;
+ 329   1          for(i=0; i<16; i++)     //ÏÈ¹Ø±ÕÏÔÊ¾£¬Ê¡µç
+ 330   1          {
+ 331   2              P_HC595_SRCLK = 1;
+ 332   2              P_HC595_SRCLK = 0;
+ 333   2          }
+ 334   1          P_HC595_RCLK = 1;
+ 335   1          P_HC595_RCLK = 0;       //Ëø´æÊä³öÊý¾Ý
+ 336   1          
+ 337   1          #if (LargeCapacitor > 0)    //ÂË²¨µçÈÝ±È½Ï´ó£¬µçÈÝ±£³ÖÊ±¼ä±È½Ï³¤(50msÒÔÉÏ)£¬ÔòÔÚÖÐ¶ÏÀï²Á³ý
+                      EEPROM_SectorErase(EE_ADDRESS); //²Á³ýÒ»¸öÉÈÇø
+                  #endif
+ 340   1      
+ 341   1          tmp[0] = (u8)(Test_cnt >> 8);
+ 342   1          tmp[1] = (u8)Test_cnt;
+ 343   1          EEPROM_write_n(EE_ADDRESS,tmp,2);
+ 344   1      
+ 345   1          while(PCON & (1<<5))            //¼ì²âÊÇ·ñÈÔÈ»µÍµçÑ¹
+ 346   1          {
+ 347   2              PCON = PCON & ~(1<<5);      //µÍÑ¹¼ì²â±êÖ¾Çå0
+ 348   2              for(i=0; i<100; i++)    ;   //ÑÓÊ±Ò»ÏÂ
+ 349   2          }
+ 350   1      }
+ 351          
+ 352          /********************** ÏÔÊ¾¼ÆÊýº¯Êý ************************/
+ 353          void    Display(void)
+ 354          {
+ 355   1          u8  i;
+ 356   1          
+ 357   1          LED8[3] = Test_cnt / 10000;
+ 358   1          LED8[4] = (Test_cnt % 10000) / 1000;
+ 359   1          LED8[5] = (Test_cnt % 1000) / 100;
+ 360   1          LED8[6] = (Test_cnt % 100) / 10;
+ 361   1          LED8[7] = Test_cnt % 10;
+ 362   1          
+C51 COMPILER V9.54   EXAMPLE_EEPROM_POWER_DOWN_WRITE                                       04/11/2016 22:54:47 PAGE 7   
+
+ 363   1          for(i=3; i<7; i++)  //ÏûÎÞÐ§0
+ 364   1          {
+ 365   2              if(LED8[i] > 0) break;
+ 366   2              LED8[i] = DIS_BLACK;
+ 367   2          }
+ 368   1      }
+ 369          
+ 370          //========================================================================
+ 371          // º¯Êý: void   ISP_Disable(void)
+ 372          // ÃèÊö: ½ûÖ¹·ÃÎÊISP/IAP.
+ 373          // ²ÎÊý: non.
+ 374          // ·µ»Ø: non.
+ 375          // °æ±¾: V1.0, 2012-10-22
+ 376          //========================================================================
+ 377          void    DisableEEPROM(void)
+ 378          {
+ 379   1          ISP_CONTR = 0;          //½ûÖ¹ISP/IAP²Ù×÷
+ 380   1          ISP_CMD   = 0;          //È¥³ýISP/IAPÃüÁî
+ 381   1          ISP_TRIG  = 0;          //·ÀÖ¹ISP/IAPÃüÁîÎó´¥·¢
+ 382   1          ISP_ADDRH = 0xff;       //Çå0µØÖ·¸ß×Ö½Ú
+ 383   1          ISP_ADDRL = 0xff;       //Çå0µØÖ·µÍ×Ö½Ú£¬Ö¸Ïò·ÇEEPROMÇø£¬·ÀÖ¹Îó²Ù×÷
+ 384   1      }
+ 385          
+ 386          //========================================================================
+ 387          // º¯Êý: void EEPROM_read_n(u16 EE_address,u8 *DataAddress,u16 number)
+ 388          // ÃèÊö: ´ÓÖ¸¶¨EEPROMÊ×µØÖ·¶Á³ön¸ö×Ö½Ú·ÅÖ¸¶¨µÄ»º³å.
+ 389          // ²ÎÊý: EE_address:  ¶Á³öEEPROMµÄÊ×µØÖ·.
+ 390          //       DataAddress: ¶Á³öÊý¾Ý·Å»º³åµÄÊ×µØÖ·.
+ 391          //       number:      ¶Á³öµÄ×Ö½Ú³¤¶È.
+ 392          // ·µ»Ø: non.
+ 393          // °æ±¾: V1.0, 2012-10-22
+ 394          //========================================================================
+ 395          
+ 396          void EEPROM_read_n(u16 EE_address,u8 *DataAddress,u16 number)
+ 397          {
+ 398   1          EA = 0;     //½ûÖ¹ÖÐ¶Ï
+ 399   1          ISP_CONTR = (ISP_EN + ISP_WAIT_FREQUENCY);  //ÉèÖÃµÈ´ýÊ±¼ä£¬ÔÊÐíISP/IAP²Ù×÷£¬ËÍÒ»´Î¾Í¹»
+ 400   1          ISP_READ();                                 //ËÍ×Ö½Ú¶ÁÃüÁî£¬ÃüÁî²»Ðè¸Ä±äÊ±£¬²»ÐèÖØÐÂËÍÃüÁî
+ 401   1          do
+ 402   1          {
+ 403   2              ISP_ADDRH = EE_address / 256;       //ËÍµØÖ·¸ß×Ö½Ú£¨µØÖ·ÐèÒª¸Ä±äÊ±²ÅÐèÖØÐÂËÍµØÖ·£©
+ 404   2              ISP_ADDRL = EE_address % 256;       //ËÍµØÖ·µÍ×Ö½Ú
+ 405   2              ISP_TRIG();                         //ÏÈËÍ5AH£¬ÔÙËÍA5Hµ½ISP/IAP´¥·¢¼Ä´æÆ÷£¬Ã¿´Î¶¼ÐèÒªÈç´Ë
+ 406   2                                                  //ËÍÍêA5Hºó£¬ISP/IAPÃüÁîÁ¢¼´±»´¥·¢Æô¶¯
+ 407   2                                                  //CPUµÈ´ýIAPÍê³Éºó£¬²Å»á¼ÌÐøÖ´ÐÐ³ÌÐò¡£
+ 408   2              _nop_();
+ 409   2              *DataAddress = ISP_DATA;            //¶Á³öµÄÊý¾ÝËÍÍù
+ 410   2              EE_address++;
+ 411   2              DataAddress++;
+ 412   2          }while(--number);
+ 413   1      
+ 414   1          DisableEEPROM();
+ 415   1          EA = 1;     //ÖØÐÂÔÊÐíÖÐ¶Ï
+ 416   1      }
+ 417          
+ 418          
+ 419          /******************** ÉÈÇø²Á³ýº¯Êý *****************/
+ 420          //========================================================================
+ 421          // º¯Êý: void EEPROM_SectorErase(u16 EE_address)
+ 422          // ÃèÊö: °ÑÖ¸¶¨µØÖ·µÄEEPROMÉÈÇø²Á³ý.
+ 423          // ²ÎÊý: EE_address:  Òª²Á³ýµÄÉÈÇøEEPROMµÄµØÖ·.
+ 424          // ·µ»Ø: non.
+C51 COMPILER V9.54   EXAMPLE_EEPROM_POWER_DOWN_WRITE                                       04/11/2016 22:54:47 PAGE 8   
+
+ 425          // °æ±¾: V1.0, 2013-5-10
+ 426          //========================================================================
+ 427          void EEPROM_SectorErase(u16 EE_address)
+ 428          {
+ 429   1          EA = 0;     //½ûÖ¹ÖÐ¶Ï
+ 430   1                                                  //Ö»ÓÐÉÈÇø²Á³ý£¬Ã»ÓÐ×Ö½Ú²Á³ý£¬512×Ö½Ú/ÉÈÇø¡£
+ 431   1                                                  //ÉÈÇøÖÐÈÎÒâÒ»¸ö×Ö½ÚµØÖ·¶¼ÊÇÉÈÇøµØÖ·¡£
+ 432   1          ISP_ADDRH = EE_address / 256;           //ËÍÉÈÇøµØÖ·¸ß×Ö½Ú£¨µØÖ·ÐèÒª¸Ä±äÊ±²ÅÐèÖØÐÂËÍµØÖ·£©
+ 433   1          ISP_ADDRL = EE_address % 256;           //ËÍÉÈÇøµØÖ·µÍ×Ö½Ú
+ 434   1          ISP_CONTR = (ISP_EN + ISP_WAIT_FREQUENCY);  //ÉèÖÃµÈ´ýÊ±¼ä£¬ÔÊÐíISP/IAP²Ù×÷£¬ËÍÒ»´Î¾Í¹»
+ 435   1          ISP_ERASE();                            //ËÍÉÈÇø²Á³ýÃüÁî£¬ÃüÁî²»Ðè¸Ä±äÊ±£¬²»ÐèÖØÐÂËÍÃüÁî
+ 436   1          ISP_TRIG();
+ 437   1          _nop_();
+ 438   1          DisableEEPROM();
+ 439   1          EA = 1;     //ÖØÐÂÔÊÐíÖÐ¶Ï
+ 440   1      }
+ 441          
+ 442          //========================================================================
+ 443          // º¯Êý: void EEPROM_write_n(u16 EE_address,u8 *DataAddress,u16 number)
+ 444          // ÃèÊö: °Ñ»º³åµÄn¸ö×Ö½ÚÐ´ÈëÖ¸¶¨Ê×µØÖ·µÄEEPROM.
+ 445          // ²ÎÊý: EE_address:  Ð´ÈëEEPROMµÄÊ×µØÖ·.
+ 446          //       DataAddress: Ð´ÈëÔ´Êý¾ÝµÄ»º³åµÄÊ×µØÖ·.
+ 447          //       number:      Ð´ÈëµÄ×Ö½Ú³¤¶È.
+ 448          // ·µ»Ø: non.
+ 449          // °æ±¾: V1.0, 2012-10-22
+ 450          //========================================================================
+ 451          void EEPROM_write_n(u16 EE_address,u8 *DataAddress,u16 number)
+ 452          {
+ 453   1          EA = 0;     //½ûÖ¹ÖÐ¶Ï
+ 454   1      
+ 455   1          ISP_CONTR = (ISP_EN + ISP_WAIT_FREQUENCY);  //ÉèÖÃµÈ´ýÊ±¼ä£¬ÔÊÐíISP/IAP²Ù×÷£¬ËÍÒ»´Î¾Í¹»
+ 456   1          ISP_WRITE();                            //ËÍ×Ö½ÚÐ´ÃüÁî£¬ÃüÁî²»Ðè¸Ä±äÊ±£¬²»ÐèÖØÐÂËÍÃüÁî
+ 457   1          do
+ 458   1          {
+ 459   2              ISP_ADDRH = EE_address / 256;       //ËÍµØÖ·¸ß×Ö½Ú£¨µØÖ·ÐèÒª¸Ä±äÊ±²ÅÐèÖØÐÂËÍµØÖ·£©
+ 460   2              ISP_ADDRL = EE_address % 256;       //ËÍµØÖ·µÍ×Ö½Ú
+ 461   2              ISP_DATA  = *DataAddress;           //ËÍÊý¾Ýµ½ISP_DATA£¬Ö»ÓÐÊý¾Ý¸Ä±äÊ±²ÅÐèÖØÐÂËÍ
+ 462   2              ISP_TRIG();
+ 463   2              _nop_();
+ 464   2              EE_address++;
+ 465   2              DataAddress++;
+ 466   2          }while(--number);
+ 467   1      
+ 468   1          DisableEEPROM();
+ 469   1          EA = 1;     //ÖØÐÂÔÊÐíÖÐ¶Ï
+ 470   1      }
+ 471          
+ 472          
+ 473          
+ 474          /**************** ÏòHC595·¢ËÍÒ»¸ö×Ö½Úº¯Êý ******************/
+ 475          void Send_595(u8 dat)
+ 476          {       
+ 477   1          u8  i;
+ 478   1          for(i=0; i<8; i++)
+ 479   1          {
+ 480   2              dat <<= 1;
+ 481   2              P_HC595_SER   = CY;
+ 482   2              P_HC595_SRCLK = 1;
+ 483   2              P_HC595_SRCLK = 0;
+ 484   2          }
+ 485   1      }
+ 486          
+C51 COMPILER V9.54   EXAMPLE_EEPROM_POWER_DOWN_WRITE                                       04/11/2016 22:54:47 PAGE 9   
+
+ 487          /********************** ÏÔÊ¾É¨Ãèº¯Êý ************************/
+ 488          void DisplayScan(void)
+ 489          {   
+ 490   1          Send_595(~T_COM[display_index]);                //Êä³öÎ»Âë
+ 491   1          Send_595(t_display[LED8[display_index]]);   //Êä³ö¶ÎÂë
+ 492   1      
+ 493   1          P_HC595_RCLK = 1;
+ 494   1          P_HC595_RCLK = 0;                           //Ëø´æÊä³öÊý¾Ý
+ 495   1          if(++display_index >= 8)    display_index = 0;  //8Î»½áÊø»Ø0
+ 496   1      }
+ 497          
+ 498          
+ 499          /********************** Timer0 1msÖÐ¶Ïº¯Êý ************************/
+ 500          void timer0 (void) interrupt 1
+ 501          {
+ 502   1          DisplayScan();  //1msÉ¨ÃèÏÔÊ¾Ò»Î»
+ 503   1          B_1ms = 1;      //1ms±êÖ¾
+ 504   1      
+ 505   1      }
+ 506          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    727    ----
+   CONSTANT SIZE    =     51    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15      15
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

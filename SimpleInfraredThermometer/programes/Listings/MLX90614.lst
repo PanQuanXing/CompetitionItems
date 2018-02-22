@@ -1,0 +1,354 @@
+C51 COMPILER V9.56.0.0   MLX90614                                                          05/30/2017 16:49:34 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE MLX90614
+OBJECT MODULE PLACED IN .\Outputs\MLX90614.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE DRIVES\MLX90614.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\USER;
+                    -.\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\MLX90614.lst) TABS(2) OBJECT(.\Outputs\MLX90614.obj)
+
+line level    source
+
+   1          #include "MLX90614.h"
+   2          #include "LCD12864.h"
+   3          void initMLX90614(){
+   4   1        //配置端口输出模式
+   5   1        GPIO_InitTypeDef gpioInitStructure;
+   6   1        gpioInitStructure.Mode=GPIO_OUT_OD;
+   7   1        gpioInitStructure.Pin=GPIO_Pin_6|GPIO_Pin_7;
+   8   1        GPIO_Init(GPIO_P2,&gpioInitStructure);
+   9   1        PWM2SMBus();
+  10   1        
+  11   1      //  SDA=1;
+  12   1      //  _nop_();
+  13   1      //  SCL=0;
+  14   1      //  _nop_();_nop_();_nop_();_nop_();
+  15   1      //  SCL=1;
+  16   1      }
+  17          
+  18          static void start_bit(){
+  19   1        SetSDA();
+  20   1        _nop_();_nop_();_nop_();_nop_();
+  21   1        Set_SCL();
+  22   1        _nop_();_nop_();_nop_();_nop_();
+  23   1        ClrSDA();
+  24   1        _nop_();_nop_();_nop_();_nop_();
+  25   1        Clr_SCL();
+  26   1        _nop_();_nop_();_nop_();_nop_();
+  27   1      }
+  28          
+  29          static void stop_bit(){
+  30   1        Clr_SCL();
+  31   1        _nop_();_nop_();_nop_();_nop_();
+  32   1        ClrSDA();
+  33   1        _nop_();_nop_();_nop_();_nop_();
+  34   1        Set_SCL();
+  35   1        _nop_();_nop_();_nop_();_nop_();
+  36   1        SetSDA();
+  37   1        _nop_();_nop_();_nop_();_nop_();
+  38   1      }
+  39          //发送位1或发送NACK应答
+  40          static void send_bit1(){
+  41   1        SetSDA();
+  42   1        _nop_();
+  43   1        Set_SCL();
+  44   1        _nop_();_nop_();_nop_();_nop_();
+  45   1        _nop_();_nop_();_nop_();_nop_();
+  46   1        Clr_SCL();
+  47   1        _nop_();_nop_();_nop_();_nop_();
+  48   1        _nop_();_nop_();_nop_();_nop_();
+  49   1      }
+  50          //发送位0或发送ACK应答
+  51          static void send_bit0(){
+  52   1        ClrSDA();
+  53   1        _nop_();
+  54   1        Set_SCL();
+C51 COMPILER V9.56.0.0   MLX90614                                                          05/30/2017 16:49:34 PAGE 2   
+
+  55   1        _nop_();_nop_();_nop_();_nop_();
+  56   1        _nop_();_nop_();_nop_();_nop_();
+  57   1        Clr_SCL();
+  58   1        _nop_();_nop_();_nop_();_nop_();
+  59   1        _nop_();_nop_();_nop_();_nop_();
+  60   1      }
+  61          
+  62          static unsigned char receive_bit(){
+  63   1        unsigned char fag=1;
+  64   1      //  SetSDA();
+  65   1        Set_SCL();
+  66   1        _nop_();_nop_();_nop_();_nop_();
+  67   1        _nop_();_nop_();_nop_();_nop_();
+  68   1        fag=SDA;
+  69   1        _nop_();
+  70   1        Clr_SCL();
+  71   1        _nop_();_nop_();_nop_();_nop_();
+  72   1        _nop_();_nop_();_nop_();_nop_();
+  73   1        return fag;
+  74   1      }
+  75          
+  76          //发送一个字节
+  77          static void tx_byte(unsigned char dat){
+  78   1        unsigned char i,n;
+  79   1        n=NACK_COUNT;
+  80   1        TX_AGAIN:
+  81   1          start_bit();
+  82   1          for(i=0;i<8;i++){
+  83   2            if((dat<<i)&0x80)
+  84   2              send_bit1();
+  85   2            else
+  86   2              send_bit0();
+  87   2          }
+  88   1          if(receive_bit()){
+  89   2            stop_bit();
+  90   2            if(n!=0){
+  91   3              n--;
+  92   3              goto TX_AGAIN;
+  93   3            }
+  94   2          }
+  95   1      }
+  96          //接收一个字节
+  97          /*********MCU从90614读入一字节*********/
+  98          static unsigned char rx_byte(void)  //数据从高位到低位//
+  99          {
+ 100   1        unsigned char i=8;
+ 101   1        unsigned char ddata=0;
+ 102   1        SDA=1;
+ 103   1        while(i--)
+ 104   1        {
+ 105   2          Clr_SCL();
+ 106   2          //I2CWait();
+ 107   2          _nop_();_nop_();_nop_();_nop_();
+ 108   2          _nop_();_nop_();_nop_();_nop_();
+ 109   2          Set_SCL();
+ 110   2          _nop_();_nop_();_nop_();_nop_();
+ 111   2          _nop_();_nop_();_nop_();_nop_();
+ 112   2          //I2CWait();     
+ 113   2          //从高位开始 ddata|=SDA;ddata<<=1
+ 114   2          Delay1ms();
+*** WARNING C206 IN LINE 114 OF DRIVES\MLX90614.c: 'Delay1ms': missing function-prototype
+ 115   2          Delay1ms();
+C51 COMPILER V9.56.0.0   MLX90614                                                          05/30/2017 16:49:34 PAGE 3   
+
+ 116   2          ddata=(ddata<<1)|SDA;
+ 117   2        }
+ 118   1        Clr_SCL();
+ 119   1        return ddata;
+ 120   1      }
+ 121          
+ 122          
+ 123          unsigned int readTemp(){
+ 124   1        unsigned char DataL,DataH;
+ 125   1        
+ 126   1        tx_byte(0x00);//发送地址
+ 127   1        tx_byte(0x07);//发送命令
+ 128   1        
+ 129   1        start_bit();
+ 130   1        tx_byte(0x01);
+ 131   1        
+ 132   1        DataL=rx_byte();
+ 133   1        DataH=rx_byte();
+ 134   1        
+ 135   1        stop_bit();
+ 136   1        return (DataH*256+DataL);
+ 137   1      }
+ 138          
+ 139          void PWM2SMBus(void){
+ 140   1        Set_SCL();
+ 141   1        //延时2us
+ 142   1        Delay1us();
+*** WARNING C206 IN LINE 142 OF DRIVES\MLX90614.c: 'Delay1us': missing function-prototype
+ 143   1        Delay1us();
+ 144   1        Clr_SCL();
+ 145   1        //delay(1200);至少延时2ms
+ 146   1        //延时2ms
+ 147   1        Delay1ms();
+ 148   1        Delay1ms();
+ 149   1        Set_SCL();
+ 150   1      }
+ 151          
+ 152          unsigned char CalculatePEC(unsigned char* msg,int len){
+ 153   1           unsigned   char   ucIndex;                 //   CRC8校验表索引         
+ 154   1           unsigned   char   ucCRC8   =   0;                 //   CRC8校验码初始化                   
+ 155   1           //计算CRC8校验码             
+ 156   1           while   (len   --){                      
+ 157   2               ucIndex=ucCRC8^(*(msg+len));  
+ 158   2               ucCRC8=CRC8TAB[ucIndex];    
+ 159   2           }                                 
+ 160   1           return   ucCRC8; //返回CRC8校验数据
+ 161   1      }
+ 162          //由MLX90614 RAM/EEPROM读取数据
+ 163          unsigned int MemRead(unsigned char slaveAddress,unsigned char cmd){
+ 164   1        unsigned char dataL;
+ 165   1        unsigned char dataH;
+ 166   1        unsigned char PEC;
+ 167   1      
+ 168   1        unsigned char msg[5];
+ 169   1        unsigned char SLA;
+ 170   1        SLA=(slaveAddress<<1);
+ 171   1        
+ 172   1        BEGIN:
+ 173   1          start_bit();
+ 174   1          tx_byte(SLA);
+ 175   1          if(receive_bit()){
+ 176   2            Lcd12864DisplayAsciiString8x16(5,1,"error code 0x01",15,0);
+C51 COMPILER V9.56.0.0   MLX90614                                                          05/30/2017 16:49:34 PAGE 4   
+
+ 177   2            stop_bit();
+ 178   2            goto BEGIN;
+ 179   2          }
+ 180   1          tx_byte(cmd);
+ 181   1          if(receive_bit()){
+ 182   2            Lcd12864DisplayAsciiString8x16(5,1,"error code 0x02",15,0);
+ 183   2            stop_bit();
+ 184   2            goto BEGIN;
+ 185   2          }
+ 186   1          start_bit();
+ 187   1          tx_byte(SLA+1);
+ 188   1          if(receive_bit()){
+ 189   2            Lcd12864DisplayAsciiString8x16(5,1,"error code 0x03",15,0);
+ 190   2            stop_bit();
+ 191   2            goto BEGIN;
+ 192   2          }
+ 193   1          dataL=rx_byte();
+ 194   1          send_bit0();//发送ACK
+ 195   1          dataH=rx_byte();
+ 196   1          send_bit0();//发送ACK
+ 197   1          PEC=rx_byte();//接收MLX90614的PEC码
+ 198   1          msg[4]=SLA;
+ 199   1          msg[3]=cmd;
+ 200   1          msg[2]=SLA+1;
+ 201   1          msg[1]=dataL;
+ 202   1          msg[0]=dataH;
+ 203   1          if(PEC==CalculatePEC(msg,5)){
+ 204   2            send_bit0();//发送ACK
+ 205   2          }else{
+ 206   2            Lcd12864DisplayAsciiString8x16(5,1,"error code 0x04",15,0);
+ 207   2            send_bit1();//发送NACK
+ 208   2            stop_bit();
+ 209   2            goto BEGIN;
+ 210   2          }
+ 211   1          return ((unsigned int)dataH<<8)+dataL;
+ 212   1      }
+ 213          //向MLX90614的EEPROM中写入数据
+ 214          void EepromWrite(unsigned char slaveAddress,unsigned char cmd,unsigned char dataH,unsigned char dataL){
+ 215   1        unsigned char PEC;
+ 216   1        unsigned char SLA;
+ 217   1        unsigned char msg[4];
+ 218   1        SLA=slaveAddress<<1;
+ 219   1        msg[3]=SLA;
+ 220   1        msg[2]=cmd;
+ 221   1        msg[1]=dataL;
+ 222   1        msg[0]=dataH;
+ 223   1        PEC=CalculatePEC(msg,4);
+ 224   1        BEGIN:
+ 225   1          start_bit();
+ 226   1          tx_byte(SLA);
+ 227   1          if(receive_bit()){
+ 228   2            stop_bit();
+ 229   2            goto BEGIN;
+ 230   2          }
+ 231   1          tx_byte(cmd);
+ 232   1          if(receive_bit()){
+ 233   2            stop_bit();
+ 234   2            goto BEGIN;
+ 235   2          }
+ 236   1          tx_byte(dataL);
+ 237   1          if(receive_bit()){
+ 238   2            stop_bit();
+C51 COMPILER V9.56.0.0   MLX90614                                                          05/30/2017 16:49:34 PAGE 5   
+
+ 239   2            goto BEGIN;
+ 240   2          }
+ 241   1          tx_byte(dataH);
+ 242   1          if(receive_bit()){
+ 243   2            stop_bit();
+ 244   2            goto BEGIN;
+ 245   2          }
+ 246   1          tx_byte(PEC);
+ 247   1          if(receive_bit()){
+ 248   2            stop_bit();
+ 249   2            goto BEGIN;
+ 250   2          }
+ 251   1          stop_bit();
+ 252   1          //delay(200);等待5ms????
+ 253   1          //延时5ms
+ 254   1          Delay1ms();
+ 255   1          Delay1ms();
+ 256   1          Delay1ms();
+ 257   1          Delay1ms();
+ 258   1          Delay1ms();
+ 259   1      }
+ 260          //10进制float转16进制
+ 261          //默认byteArry的长度len为sizeof(float)
+ 262          //float类型一共4字节，低两位代表小数点后面小数
+ 263          void Float2Emissivity(float e,unsigned char* dataH,unsigned char* dataL){
+ 264   1        int num;
+ 265   1        unsigned char i;
+ 266   1          unsigned char emissivityArry[4];
+ 267   1        i=0;
+ 268   1        num=(e*65535)+0.5;
+ 269   1        num&=0x0000ffff;//只取低两字节
+ 270   1        while(num!=0)
+ 271   1        {
+ 272   2          emissivityArry[4-(++i)]=num%16;//倒序保存
+ 273   2          num/=16;
+ 274   2      
+ 275   2        }
+ 276   1        //一定要加括号，因为+比<<优先级大
+ 277   1        *dataL=(emissivityArry[2]<<4)+emissivityArry[3];   
+ 278   1        *dataH=(emissivityArry[0]<<4)+emissivityArry[1];  
+ 279   1      }
+ 280          
+ 281          void ChangeEmissivity(float emissivity){
+ 282   1        unsigned char EmL;
+ 283   1        unsigned char EmH;
+ 284   1        unsigned char slaveAddress;
+ 285   1        Float2Emissivity(emissivity,&EmH,&EmL);
+ 286   1        slaveAddress=MemRead(0x00,EepromAccess|SMbusAddr);//读取存于EEPROM "0Eh"中的受控地址
+ 287   1        EepromWrite(slaveAddress,0x24,0x00,0x00);//清零，写入数据0x0000到EEPROM "04h"
+ 288   1        EepromWrite(slaveAddress,0x24,EmH,EmL);
+ 289   1      }
+ 290          
+ 291          void EnterSleepMode(){
+ 292   1        unsigned char slaveAddress;
+ 293   1        slaveAddress=MemRead(0x00,EepromAccess|SMbusAddr);
+ 294   1        BEGIN:
+ 295   1          start_bit();
+ 296   1          tx_byte(slaveAddress<<1);
+ 297   1          if(receive_bit()){
+ 298   2            stop_bit();
+ 299   2            goto BEGIN;
+ 300   2          }
+C51 COMPILER V9.56.0.0   MLX90614                                                          05/30/2017 16:49:34 PAGE 6   
+
+ 301   1          tx_byte(0xff);
+ 302   1          if(receive_bit()){
+ 303   2            stop_bit();
+ 304   2            goto BEGIN;
+ 305   2          }
+ 306   1          tx_byte(0xf3);  //0xf3为PEC码
+ 307   1          if(receive_bit()){
+ 308   2            stop_bit();
+ 309   2            goto BEGIN;
+ 310   2          }
+ 311   1          stop_bit();
+ 312   1      }
+ 313          
+ 314          unsigned int getTemperature(){
+ 315   1        unsigned char slaveAddress;
+ 316   1        slaveAddress=MemRead(0x00,0x2E);
+ 317   1        return MemRead(slaveAddress,0x07);
+ 318   1      } 
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1077    ----
+   CONSTANT SIZE    =    320    ----
+   XDATA SIZE       =   ----      47
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,98 @@
+C51 COMPILER V9.56.0.0   TASKSTART                                                         02/21/2018 14:26:20 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE TASKSTART
+OBJECT MODULE PLACED IN .\Outputs\taskStart.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE USER\taskStart.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\USER;.
+                    -\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\taskStart.lst) TABS(2) OBJECT(.\Outputs\taskStart.obj)
+
+line level    source
+
+   1          #include "includes.h"
+   2          
+   3          void initTaskStart() _task_ 0{
+   4   1        unsigned char ch[17];
+   5   1        initKeys();
+   6   1        OLED_Init();
+   7   1        OLED_Clear();
+   8   1        initMLX90614();
+   9   1        initPqxMenus();
+  10   1        os_create_task(1);
+  11   1        os_create_task(4);
+  12   1        os_create_task(5);
+  13   1        os_create_task(6);
+  14   1        os_create_task(7);
+  15   1        while(1){
+  16   2          if(pageItem==1){
+  17   3            updatePage(HOME,3,homeItem);
+  18   3            Oled12832ClearPage(4,128);      
+  19   3          }else if(pageItem==2){
+  20   3            updatePage(GOGO,4,goItem);
+  21   3          }else if(pageItem==3){
+  22   3            updatePage(SET,4,setItem);
+  23   3          }else if(pageItem==4){
+  24   3            updatePage(HuItems,1,HuItem);
+  25   3            Oled12832ClearPage(2,128);
+  26   3            Oled12832ClearPage(3,128);
+  27   3            Oled12832ClearPage(4,128);
+  28   3            sprintf(ch,"[%f^C]", result);
+  29   3            Oled12832DisplayAsciiString8x16(2,2,(unsigned char*)ch,(unsigned char)strlen((const char*)ch),0);
+  30   3          }else if(pageItem==5){
+  31   3            updatePage(HuItems,1,NoItem);
+  32   3            Oled12832ClearPage(2,128);
+  33   3            Oled12832ClearPage(3,128);
+  34   3            Oled12832ClearPage(4,128);
+  35   3            Oled12832DisplayAsciiString6x8(2,1,noTitle,21,0);
+  36   3            sprintf(ch,"%0.2f^C", result);
+  37   3            Oled12832DisplayAsciiString8x16(3,0,(unsigned char*)ch,(unsigned char)strlen((const char*)ch),0);
+  38   3            sprintf(ch,"%0.2f^C", result02);
+  39   3            Oled12832DisplayAsciiString8x16(3,60,(unsigned char*)ch,(unsigned char)strlen((const char*)ch),0);
+  40   3          }else if(pageItem==6){
+  41   3            Oled12832DisplayAsciiString6x8(1,2,History,21,0);
+  42   3            Oled12832ClearPage(2,128);
+  43   3            Oled12832ClearPage(3,128);
+  44   3            Oled12832ClearPage(4,128);
+  45   3            sprintf(ch,"%d--(%0.2f^C)", historyNum,result);
+  46   3            Oled12832DisplayAsciiString8x16(3,2,(unsigned char*)ch,(unsigned char)strlen((const char*)ch),0);
+  47   3          }else if(pageItem==7){//改变lower
+  48   3            Oled12832DisplayAsciiString6x8(1,2,MiTitle,21,0);
+  49   3            Oled12832ClearPage(2,128);
+  50   3            Oled12832ClearPage(3,128);
+  51   3            Oled12832ClearPage(4,128);
+  52   3            sprintf(ch,"----( %d^C )---",lowerValue);
+  53   3            Oled12832DisplayAsciiString8x16(3,2,(unsigned char*)ch,(unsigned char)strlen((const char*)ch),0);
+  54   3          }else if(pageItem==8){//改变upper
+C51 COMPILER V9.56.0.0   TASKSTART                                                         02/21/2018 14:26:20 PAGE 2   
+
+  55   3            Oled12832DisplayAsciiString6x8(1,2,MaTitle,21,0);
+  56   3            Oled12832ClearPage(2,128);
+  57   3            Oled12832ClearPage(3,128);
+  58   3            Oled12832ClearPage(4,128);
+  59   3            sprintf(ch,"----( %d^C )---",upperValue);
+  60   3            Oled12832DisplayAsciiString8x16(3,2,(unsigned char*)ch,(unsigned char)strlen((const char*)ch),0);
+  61   3          }else if(pageItem==9){
+  62   3            Oled12832DisplayAsciiString6x8(1,2,EmTitle,21,0);
+  63   3            Oled12832ClearPage(2,128);
+  64   3            Oled12832ClearPage(3,128);
+  65   3            Oled12832ClearPage(4,128);
+  66   3            sprintf(ch,"----( %0.1f )---",(emissivity*0.1));
+  67   3            Oled12832DisplayAsciiString8x16(3,2,(unsigned char*)ch,(unsigned char)strlen((const char*)ch),0);
+  68   3          }
+  69   2          os_wait1(K_SIG);
+  70   2        }
+  71   1      }
+  72          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    966    ----
+   CONSTANT SIZE    =    318    ----
+   XDATA SIZE       =   ----      17
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

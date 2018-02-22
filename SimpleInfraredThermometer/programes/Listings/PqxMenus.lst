@@ -1,0 +1,108 @@
+C51 COMPILER V9.56.0.0   PQXMENUS                                                          02/21/2018 14:26:18 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE PQXMENUS
+OBJECT MODULE PLACED IN .\Outputs\PqxMenus.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE USER\PqxMenus.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\USER;.\
+                    -RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\PqxMenus.lst) TABS(2) OBJECT(.\Outputs\PqxMenus.obj)
+
+line level    source
+
+   1          #define PQXMENUS
+   2          #include "PqxMenus.h"
+   3          extern unsigned char code home01[22]  ="********START********";
+   4          extern unsigned char code home02[22]  ="-->GO                ";
+   5          extern unsigned char code home03[22]  ="-->SETTING           ";
+   6          extern unsigned char code go01[22]    ="*********GO**********";
+   7          extern unsigned char code go02[22]    ="->Body Temperature   ";
+   8          extern unsigned char code go03[22]    ="->Normal Temperature ";
+   9          extern unsigned char code go04[22]    ="->History            ";
+  10          extern unsigned char code set01[22]   ="*******SETTING*******";
+  11          extern unsigned char code set02[22]   ="->Lower Limit        ";
+  12          extern unsigned char code set03[22]   ="->Upper Limit        ";
+  13          extern unsigned char code set04[22]   ="->Emissivity         ";
+  14          
+  15          extern unsigned char code noTitle[22] ="Tobj:    Tamb:      ";
+  16          
+  17          extern unsigned char code Human[22]   =">>Shell Temperature<<";
+  18          extern unsigned char code Normal[22]  =">>>>>>Generally<<<<<<";
+  19          extern unsigned char code History[22] ="-------History-------";
+  20          
+  21          extern unsigned char code EmTitle[22] ="--Change Emissivity--";
+  22          extern unsigned char code MiTitle[22] ="--ChangeLowerLimit---";
+  23          extern unsigned char code MaTitle[22] ="--ChangeUpperLimit---";
+  24          
+  25          void initPqxMenus(void){
+  26   1      
+  27   1      homeItem=0;
+  28   1      goItem=0;
+  29   1      setItem=0;
+  30   1      pageItem=1;
+  31   1      
+  32   1      HuItem=1;
+  33   1      NoItem=1;
+  34   1      HiItem=1;
+  35   1      
+  36   1      MiItem=1;
+  37   1      MaItem=1;
+  38   1      EmItem=1;
+  39   1        
+  40   1        
+  41   1        
+  42   1        HOME[0]=home01;
+  43   1        HOME[1]=home02;
+  44   1        HOME[2]=home03;
+  45   1      
+  46   1        GOGO[0]=go01;
+  47   1        GOGO[1]=go02;
+  48   1        GOGO[2]=go03;
+  49   1        GOGO[3]=go04;
+  50   1      
+  51   1        SET[0]=set01;
+  52   1        SET[1]=set02;
+  53   1        SET[2]=set03;
+  54   1        SET[3]=set04;
+C51 COMPILER V9.56.0.0   PQXMENUS                                                          02/21/2018 14:26:18 PAGE 2   
+
+  55   1        
+  56   1        HuItems[0]=Human;
+  57   1        NoItems[0]=Normal;
+  58   1      }
+  59          
+  60          void updatePage(unsigned char* page[],unsigned char len,unsigned char item){
+  61   1        unsigned char i;
+  62   1        for(i=0;i<len;i++){
+  63   2          if(i==item)
+  64   2            Oled12832DisplayAsciiString6x8(i+1,2,page[i],21,1);
+  65   2          else
+  66   2            Oled12832DisplayAsciiString6x8(i+1,2,page[i],21,0);
+  67   2        }
+  68   1        
+  69   1      }
+  70          
+  71          void upAction(unsigned char *input){
+  72   1        if((*input)>0)
+  73   1          (*input)-=1;
+  74   1        else
+  75   1          (*input)=1;
+  76   1      }
+  77          void downAction(unsigned char *input){
+  78   1        if((*input)<1)
+  79   1          (*input)+=1;
+  80   1        else
+  81   1          (*input)=0;
+  82   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    381    ----
+   CONSTANT SIZE    =    396    ----
+   XDATA SIZE       =     69       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

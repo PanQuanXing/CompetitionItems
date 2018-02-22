@@ -1,0 +1,72 @@
+C51 COMPILER V9.56.0.0   PANQUANXING                                                       02/21/2018 14:26:19 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE PANQUANXING
+OBJECT MODULE PLACED IN .\Outputs\panquanxing.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE DRIVES\panquanxing.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\US
+                    -ER;.\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\panquanxing.lst) TABS(2) OBJECT(.\Outputs\panquanxing.obj)
+
+line level    source
+
+   1          #include "STC15F2K60S2.h"
+   2          #include "panquanxing.h"
+   3          #include "intrins.h"
+   4          
+   5          void disableEEPROM(void){
+   6   1        IAP_CONTR = 0;          //禁止IAP/IAP操作
+   7   1        IAP_CMD   = 0;          //去除IAP/IAP命令
+   8   1        IAP_TRIG  = 0;          //防止IAP/IAP命令误触发
+   9   1        IAP_ADDRL = 0xff;       //清0地址高字节
+  10   1        IAP_ADDRH = 0xff;       //清0地址低字节，指向非EEPROM区，防止误操作
+  11   1      }
+  12          uchar EEPROM_ReadByte(short addr){
+  13   1        uchar dat;
+  14   1        IAP_ADDRL=addr;//送地址低8位
+  15   1        IAP_ADDRH=addr>>8;//送地址高8位
+  16   1        IAP_CONTR=ENABLE_IAP;
+  17   1        IAP_CMD=0x01;
+  18   1        IAP_TRIG();
+  19   1        _nop_();
+  20   1        dat=IAP_DATA;//取出数据
+  21   1        disableEEPROM();
+  22   1        return dat;
+  23   1      }
+  24          
+  25          void EEPROM_WriteByte(short addr,uchar dat){
+  26   1        IAP_ADDRL=addr;
+  27   1        IAP_ADDRH=addr>>8;
+  28   1        IAP_CONTR=ENABLE_IAP;
+  29   1        IAP_CMD=0x02;//Flash/EEPROM区进行字节编程命令
+  30   1        IAP_DATA=dat;//将数据放入IAP_DATA
+  31   1        IAP_TRIG();
+  32   1        _nop_();
+  33   1        disableEEPROM();
+  34   1      }
+  35          
+  36          void EEPROM_EraseSector(short addr){
+  37   1        IAP_ADDRL=addr;
+  38   1        IAP_ADDRH=addr>>8;
+  39   1        IAP_CONTR=ENABLE_IAP;
+  40   1        IAP_CMD=0x03;
+  41   1        IAP_TRIG();
+  42   1        _nop_();
+  43   1        disableEEPROM();
+  44   1      }
+  45          
+  46          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     87    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+C51 COMPILER V9.56.0.0   PANQUANXING                                                       02/21/2018 14:26:19 PAGE 2   
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

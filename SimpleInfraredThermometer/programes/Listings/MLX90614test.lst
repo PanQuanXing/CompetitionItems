@@ -1,0 +1,319 @@
+C51 COMPILER V9.56.0.0   MLX90614TEST                                                      05/30/2017 16:31:44 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE MLX90614TEST
+OBJECT MODULE PLACED IN .\Outputs\MLX90614test.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE DRIVES\MLX90614test.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\U
+                    -SER;.\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\MLX90614test.lst) TABS(2) OBJECT(.\Outputs\MLX90614test.obj)
+
+line level    source
+
+   1          #include "MLX90614test.h"
+   2          //愿上帝与我同在
+   3          void Pwm2Smbus(){
+   4   1        _SCL_OUTPUT();
+   5   1        _nop_();_nop_();_nop_();
+   6   1        _nop_();_nop_();_nop_();
+   7   1        SCL=1;
+   8   1        _nop_();_nop_();_nop_();
+   9   1        _nop_();_nop_();_nop_();
+  10   1        SCL=0;
+  11   1        Delay_ms(4);
+  12   1        SCL=1;
+  13   1        _nop_();_nop_();_nop_();
+  14   1        _nop_();_nop_();_nop_();
+  15   1      }
+  16          static void start_bit(){
+  17   1        _SDA_OUTPUT();
+  18   1        _nop_();_nop_();_nop_();
+  19   1        _nop_();_nop_();_nop_();
+  20   1        SDA=1;
+  21   1        SCL=1;
+  22   1        SmbusDelay10us();
+  23   1        SDA=0;
+  24   1        SmbusDelay10us();
+  25   1        SCL=0;
+  26   1        SmbusDelay10us();
+  27   1      }
+  28          //修改后的stop
+  29          static void stop_bit(){
+  30   1        _SDA_OUTPUT();
+  31   1        SDA=0;
+  32   1        SCL=1;
+  33   1        SmbusDelay10us();
+  34   1        SDA=1;
+  35   1        SmbusDelay20us();
+  36   1        SCL=0;
+  37   1        SmbusDelay20us();
+  38   1      }
+  39          void SmbusAck(){
+  40   1        _SDA_OUTPUT();
+  41   1        _nop_();_nop_();_nop_();
+  42   1        _nop_();_nop_();_nop_();
+  43   1        SDA=0;
+  44   1        _nop_();_nop_();_nop_();
+  45   1        _nop_();_nop_();_nop_();
+  46   1        SCL=1;
+  47   1        SmbusDelay10us();
+  48   1        SCL=0;
+  49   1        SmbusDelay10us();
+  50   1      }
+  51          void SmbusNack(){
+  52   1        _SDA_OUTPUT();
+  53   1        _nop_();_nop_();_nop_();
+  54   1        _nop_();_nop_();_nop_();
+C51 COMPILER V9.56.0.0   MLX90614TEST                                                      05/30/2017 16:31:44 PAGE 2   
+
+  55   1        SDA=1;
+  56   1        _nop_();_nop_();_nop_();
+  57   1        _nop_();_nop_();_nop_();
+  58   1        SCL=1;
+  59   1        SmbusDelay10us();
+  60   1        SCL=0;
+  61   1        SmbusDelay10us();
+  62   1      }
+  63          //修改后的send_byte
+  64          static bit send_byte(unsigned char ddata){
+  65   1        unsigned char i=0;
+  66   1        _SDA_OUTPUT();
+  67   1        _nop_();_nop_();_nop_();
+  68   1        _nop_();_nop_();_nop_();
+  69   1        for(i=0;i<8;i++){
+  70   2      //    if((ddata<<i)&0x80){
+  71   2      //      SDA=1;
+  72   2      //    }else{
+  73   2      //      SDA=0;
+  74   2      //    }
+  75   2          if(ddata&0x80)
+  76   2            SDA=1;
+  77   2          else
+  78   2            SDA=0;
+  79   2          ddata<<=1;
+  80   2          _nop_();_nop_();_nop_();
+  81   2          _nop_();_nop_();_nop_();
+  82   2          SCL=1;
+  83   2          SmbusDelay10us();
+  84   2          SCL=0;
+  85   2          SmbusDelay10us();
+  86   2        }
+  87   1        _SDA_INPUT();
+  88   1        //延时2us
+  89   1        _nop_();_nop_();_nop_();
+  90   1        _nop_();_nop_();_nop_();
+  91   1        SCL=1;
+  92   1        //延时4us
+  93   1        _nop_();_nop_();_nop_();
+  94   1        _nop_();_nop_();_nop_();
+  95   1        _nop_();_nop_();_nop_();
+  96   1        _nop_();_nop_();_nop_();
+  97   1        if(SDA)
+  98   1        {
+  99   2          Lcd12864ShowByte(7,60,0xaa);
+ 100   2          _nop_();_nop_();_nop_();
+ 101   2          _nop_();_nop_();_nop_();
+ 102   2          _nop_();_nop_();_nop_();
+ 103   2          _nop_();_nop_();_nop_();
+ 104   2          SCL=0; 
+ 105   2          SmbusDelay10us();
+ 106   2          return false;
+ 107   2        }
+ 108   1        _nop_();_nop_();_nop_();
+ 109   1        _nop_();_nop_();_nop_();
+ 110   1        _nop_();_nop_();_nop_();
+ 111   1        _nop_();_nop_();_nop_();
+ 112   1        SCL=0;
+ 113   1        SmbusDelay10us();
+ 114   1        return true;
+ 115   1      }
+ 116          
+C51 COMPILER V9.56.0.0   MLX90614TEST                                                      05/30/2017 16:31:44 PAGE 3   
+
+ 117          
+ 118          static unsigned char receive_byte(void){
+ 119   1        unsigned char i=8,ddata=0;
+ 120   1        _SDA_INPUT();
+ 121   1        _nop_();_nop_();_nop_();
+ 122   1        _nop_();_nop_();_nop_();
+ 123   1      //  SDA=1;//注意！！！
+ 124   1      //  SmbusDelay10us();
+ 125   1        while(i--){ 
+ 126   2          ddata<<=1;
+ 127   2          SCL=1;
+ 128   2          _nop_();_nop_();_nop_();
+ 129   2          _nop_();_nop_();_nop_();
+ 130   2          _nop_();_nop_();_nop_();
+ 131   2          _nop_();_nop_();_nop_();
+ 132   2          if(SDA){//从高位开始 ddata|=SDA;ddata<<=1;ddata=(ddata<<1)|SDA;
+ 133   3            ddata|=0x01;
+ 134   3          }else{
+ 135   3            ddata&=0xfe;
+ 136   3          } 
+ 137   2          //延时2us
+ 138   2          _nop_();_nop_();_nop_();
+ 139   2          _nop_();_nop_();_nop_();
+ 140   2          SCL=0;
+ 141   2          //延时10us
+ 142   2          SmbusDelay10us();
+ 143   2        }
+ 144   1        return ddata;
+ 145   1      }
+ 146          
+ 147          int ReadDate_90614(unsigned char *pec,unsigned char *test)
+ 148          {
+ 149   1        unsigned char dataL;
+ 150   1        int result;
+ 151   1      
+ 152   1        start_bit();
+ 153   1        if(!send_byte(0xb4)) return 0x0000;
+ 154   1                    
+ 155   1        if(!send_byte(0x07)) return 0x0000;   //Tobj1
+ 156   1        
+ 157   1        start_bit();
+ 158   1        if(!send_byte(0xb5)) return 0x0000; 
+ 159   1        
+ 160   1        dataL=receive_byte();
+ 161   1        SmbusAck();
+ 162   1        result=receive_byte();
+ 163   1        SmbusAck();
+ 164   1        result<<=8;
+ 165   1        result+=dataL;
+ 166   1        *pec=receive_byte();
+ 167   1        SmbusAck();
+ 168   1        stop_bit();
+ 169   1        *test=receive_byte();
+ 170   1        return result;
+ 171   1      }
+ 172          //计算PEC码
+ 173          unsigned char CalculatePEC(unsigned char* msg,int len){
+ 174   1           unsigned   char   ucIndex;                 //   CRC8校验表索引         
+ 175   1           unsigned   char   ucCRC8 = 0;              //   CRC8校验码初始化                   
+ 176   1           //计算CRC8校验码             
+ 177   1           while(len--){                      
+ 178   2               ucIndex=ucCRC8^(*(msg+len));  
+C51 COMPILER V9.56.0.0   MLX90614TEST                                                      05/30/2017 16:31:44 PAGE 4   
+
+ 179   2               ucCRC8=CRC8TAB[ucIndex];    
+ 180   2           }                                 
+ 181   1           return ucCRC8; //返回CRC8校验数据
+ 182   1      }
+ 183          
+ 184          
+ 185          unsigned char PEC_cal(unsigned char pec[])
+ 186          {
+ 187   1           unsigned char idata crc[6];
+ 188   1           unsigned char idata Bitposition=47;
+ 189   1           unsigned char idata shift;
+ 190   1           unsigned char idata i;
+ 191   1           unsigned char idata j;
+ 192   1           unsigned char idata temp;
+ 193   1      
+ 194   1       do{
+ 195   2                crc[5]=0;                         //Load CRC value 0x000000000107
+ 196   2                crc[4]=0;
+ 197   2                crc[3]=0;
+ 198   2                crc[2]=0;
+ 199   2                crc[1]=0x01;
+ 200   2                crc[0]=0x07;
+ 201   2                Bitposition=47;                         //Set maximum bit position at 47
+ 202   2                shift=0;
+ 203   2      
+ 204   2                //Find first 1 in the transmitted bytes
+ 205   2      
+ 206   2                i=5;                        //Set highest index (package byte index)
+ 207   2                j=0;                              //Byte bit index, from lowest
+ 208   2                while((pec[i]&(0x80>>j))==0 && (i>0))
+ 209   2            
+ 210   2            {
+ 211   3                   Bitposition--;
+ 212   3                   if(j<7)
+ 213   3                 {
+ 214   4                          j++;
+ 215   4                       }
+ 216   3                   else
+ 217   3                 {
+ 218   4                         j=0x00;
+ 219   4                         i--;
+ 220   4                       }
+ 221   3                 }//End of while, and the position of highest "1" bit in Bitposition is calculated 
+ 222   2             
+ 223   2                shift=Bitposition-8;                          //Get shift value for CRC value
+ 224   2      
+ 225   2                                                  //Shift CRC value left with "shift" bits
+ 226   2      
+ 227   2                while(shift)
+ 228   2            {
+ 229   3                    for(i=5;i<0xFF;i--)
+ 230   3                 {  
+ 231   4                          if((crc[i-1]&0x80) && (i>0))        //Check if the MSB of the byte lower is "1"
+ 232   4             {                      //Yes - current byte + 1
+ 233   5                                temp=1;     //No - current byte + 0
+ 234   5                               }        //So that "1" can shift between bytes
+ 235   4                          else
+ 236   4             {
+ 237   5                                temp=0;
+ 238   5                               }
+ 239   4                           crc[i]<<=1;
+ 240   4                           crc[i]+=temp;
+C51 COMPILER V9.56.0.0   MLX90614TEST                                                      05/30/2017 16:31:44 PAGE 5   
+
+ 241   4                        } 
+ 242   3      
+ 243   3                        shift--;
+ 244   3                   } 
+ 245   2      
+ 246   2                 //Exclusive OR between pec and crc
+ 247   2      
+ 248   2                 for(i=0;i<=5;i++)
+ 249   2           {
+ 250   3                         pec[i]^=crc[i];
+ 251   3             }  
+ 252   2      
+ 253   2          }while(Bitposition>8); 
+ 254   1      
+ 255   1        return pec[0];
+ 256   1      }
+ 257          
+ 258          float Data2Temperature(int ddata,bit flag){
+ 259   1        float result;
+ 260   1        result=ddata/50;
+ 261   1        if(flag){
+ 262   2          result-=273.15;
+ 263   2        }
+ 264   1        return result;
+ 265   1      }
+ 266          
+ 267          float CALTEMP(unsigned  int TEMP)
+ 268          {
+ 269   1        unsigned int T;
+ 270   1          float temperater;
+ 271   1        T = TEMP*2;
+ 272   1        
+ 273   1        if(T>=27315)
+ 274   1        {
+ 275   2              temperater = T - 27315;
+ 276   2        }
+ 277   1          else
+ 278   1          {
+ 279   2            temperater =27315 - T;
+ 280   2            temperater = - temperater;
+ 281   2          }
+ 282   1        
+ 283   1        temperater = temperater/100;
+ 284   1        
+ 285   1        return temperater;
+ 286   1          
+ 287   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1089    ----
+   CONSTANT SIZE    =    256    ----
+   XDATA SIZE       =   ----      31
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----      11
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

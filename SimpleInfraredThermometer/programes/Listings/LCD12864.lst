@@ -1,0 +1,193 @@
+C51 COMPILER V9.56.0.0   LCD12864                                                          06/03/2017 00:20:08 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE LCD12864
+OBJECT MODULE PLACED IN .\Outputs\LCD12864.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE DRIVES\LCD12864.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\DRIVES;.\USER;
+                    -.\RTXOS) DEBUG OBJECTEXTEND PRINT(.\Listings\LCD12864.lst) TABS(2) OBJECT(.\Outputs\LCD12864.obj)
+
+line level    source
+
+   1          #include "LCD12864.h"
+   2          
+   3          static void Config_Port(void){
+   4   1        GPIO_InitTypeDef  GPIO_InitStructure;
+   5   1        
+   6   1        //ÅäÖÃP2.0-P2.4ÎªÉÏÀ­×¼Ë«Ïò¿ÚÄ£Ê½
+   7   1        GPIO_InitStructure.Mode = GPIO_PullUp; 
+   8   1        GPIO_InitStructure.Pin  = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4;
+   9   1        GPIO_Init(GPIO_P2, &GPIO_InitStructure);
+  10   1        
+  11   1        //ÅäÖÃP2.5ÎªÇ¿ÍÆÍìÊä³öÄ£Ê½
+  12   1        GPIO_InitStructure.Mode=GPIO_OUT_PP;
+  13   1        GPIO_InitStructure.Pin=GPIO_Pin_5;
+  14   1        GPIO_Init(GPIO_P2, &GPIO_InitStructure);
+  15   1      }
+  16          
+  17          static void Push_In(unsigned char* ch){
+  18   1        unsigned char i;
+  19   1        for(i=0;i<8;i++){
+  20   2          Clr_SCK();
+  21   2          if((*ch)&0x80) {
+  22   3              Set_SDA();
+  23   3          }else{
+  24   3              Clr_SDA();
+  25   3          }
+  26   2          Set_SCK();
+  27   2          (*ch) <<= 1;
+  28   2        } 
+  29   1      }
+  30          
+  31          void Lcd12864_Write_Cmd(unsigned char cmd){
+  32   1        Clr_CS();
+  33   1        Clr_RS();
+  34   1        Push_In(&cmd);
+  35   1        Set_CS();
+  36   1      }
+  37          
+  38          void Lcd12864_Write_Data(unsigned char dat){
+  39   1        Clr_CS();
+  40   1        Set_RS();
+  41   1        Push_In(&dat);
+  42   1        Set_CS();
+  43   1      }
+  44          
+  45          static void Set_Position(unsigned char page,unsigned char column){
+  46   1        page-=1;
+  47   1        column-=1;
+  48   1        Lcd12864_Write_Cmd(0xb0+page);
+  49   1        Lcd12864_Write_Cmd((column>>4)|0x10);
+  50   1        Lcd12864_Write_Cmd(column&0x0f);
+  51   1      }
+  52          
+  53          void Lcd12864_Init(void){
+  54   1        Config_Port();    //ÅäÖÃIO¿Ú
+C51 COMPILER V9.56.0.0   LCD12864                                                          06/03/2017 00:20:08 PAGE 2   
+
+  55   1        LCD_On();
+  56   1        Clr_CS();
+  57   1        Clr_RST();
+  58   1        Delay_us(100);
+  59   1        Set_RST();//LCD¸´Î»
+  60   1        Delay_us(5);
+  61   1        Lcd12864_Write_Cmd(0xe2);//Ö¸Áî14£ºLCDÈí¸´Î»
+  62   1        Delay_us(5);
+  63   1        Lcd12864_Write_Cmd(0x2c);   //Ö¸Áî16£º´ò¿ªÄÚ²¿ÉýÑ¹
+  64   1        Delay_us(5);
+  65   1        Lcd12864_Write_Cmd(0x2e);   //Ö¸Áî16£º´ò¿ªµçÑ¹µ÷ÕûµçÂ·
+  66   1        Delay_us(5);
+  67   1        Lcd12864_Write_Cmd(0x2f);   //Ö¸Áî16£º´ò¿ªµçÑ¹¸úËæÆ÷
+  68   1        Delay_us(5);
+  69   1        Lcd12864_Write_Cmd(0x23);   //Ö¸Áî17£º´Öµ÷¶Ô±È¶È£¬¿ÉÉèÖÃ·¶Î§0x20¡«0x27
+  70   1        Lcd12864_Write_Cmd(0x81);   //Ö¸Áî18£ºÉèÖÃÄÚ²¿µç×èÎ¢µ÷
+  71   1        Lcd12864_Write_Cmd(0x28);   //Ö¸Áî18£ºÎ¢µ÷¶Ô±È¶È£¬Î¢µ÷¶Ô±È¶ÈµÄÖµ£¬¿ÉÉèÖÃ·¶Î§0x00¡«0x3f
+  72   1        Lcd12864_Write_Cmd(0xa2);   //Ö¸Áî11£ºÉèÖÃÆ«Ñ¹±È£¬0xa2:1/9(³£ÓÃ),0xa7:1/7
+  73   1        Lcd12864_Write_Cmd(0xc8);   //Ö¸Áî15£ºÐÐÉ¨ÃèË³Ðò£º0xc0ÉÏµ½ÏÂ,0xc8ÏÂµ½ÉÏ
+  74   1        Lcd12864_Write_Cmd(0xa0);   //Ö¸Áî8£ºÏÔÊ¾ÁÐµØÖ·Ôö¼õ£¬ÁÐÉ¨ÃèË³Ðò£º´Ó×óµ½ÓÒ
+  75   1        Lcd12864_Write_Cmd(0x40);   //Ö¸Áî2£ºÏÔÊ¾³õÊ¼ÐÐÉèÖÃ£¬0x40(µÚÒ»ÐÐ¿ªÊ¼)
+  76   1        Lcd12864_Write_Cmd(0xaf);   //Ö¸Áî1£º0xaf(¿ªÏÔÊ¾)  0xae(¹ØÏÔÊ¾)
+  77   1        Set_CS();   //Æ¬Ñ¡À­¸ß
+  78   1      }
+  79          
+  80          void Lcd12864_Clear(void){
+  81   1        unsigned char i,j;
+  82   1        for(i=0;i<8;i++)
+  83   1        {
+  84   2          Set_Position(1+i,1);     //(Ò³µØÖ·£¬ÁÐµØÖ·)
+  85   2          for(j=0;j<128;j++)  //128ÁÐ
+  86   2          {
+  87   3            Lcd12864_Write_Data(0x00);
+  88   3          }
+  89   2        }
+  90   1      }
+  91          
+  92          void Lcd12864_Full(void){
+  93   1        Lcd12864_Write_Cmd(0xa5);   //Ö¸Áî10£ºÏÔÊ¾È«²¿µãÕó
+  94   1      }
+  95          void Lcd12864ShowNum(unsigned char page,unsigned char column,unsigned char * text){
+  96   1        unsigned char k,n;
+  97   1        for(n=0;n<2;n++)    //ÐèÒªÁ½ÐÐÏÔÊ¾£¬·ÖÉÏ°ë²¿·ÖºÍÏÂ°ë²¿·Ö
+  98   1        {
+  99   2          Set_Position(page+n,column);
+ 100   2          for(k=0;k<8;k++)
+ 101   2          {   
+ 102   3              Lcd12864_Write_Data(text[k+8*n]);/*ÏÔÊ¾8x16µÄASCII×Öµ½LCDÉÏ£¬yÎªÒ³µØÖ·£¬xÎªÁÐµØÖ·£¬×îºóÎªÊý¾Ý*/
+ 103   3      
+ 104   3          }
+ 105   2        }
+ 106   1      }
+ 107          
+ 108          void Lcd12864ShowByte(unsigned char page,unsigned char column,unsigned char text){
+ 109   1        Set_Position(page,column);
+ 110   1        Lcd12864_Write_Data(text);/*ÏÔÊ¾8x16µÄASCII×Öµ½LCDÉÏ£¬yÎªÒ³µØÖ·£¬xÎªÁÐµØÖ·£¬×îºóÎªÊý¾Ý*/
+ 111   1      }
+ 112          
+ 113          void Lcd12864DisplayAsciiString8x16(unsigned char page,unsigned char column,unsigned char * text,unsigned 
+             -char txtlen,unsigned char charINV){
+ 114   1        
+ 115   1        unsigned char i,j,k,n;
+C51 COMPILER V9.56.0.0   LCD12864                                                          06/03/2017 00:20:08 PAGE 3   
+
+ 116   1        for(i=0;i<txtlen;i++)
+ 117   1        {
+ 118   2          if((text[i]>=0x20)&&(text[i]<=0x7e))    /*ASCIIÂë×Ö·û·¶Î§32¡«126¹²95¸ö*/
+ 119   2          {
+ 120   3            j=text[i]-0x20;     //0x20 = 32, 32Îª¿Õ×Ö·û£¬ÊÇ×Ö·û±íµÄµÚÒ»¸ö×Ö·û£¬´ËÐÐ´úÂë¼ÆËã´ýÏÔÊ¾×Ö·û
+ 121   3                      //Ïà¶ÔÓÚµÚÒ»¸ö×Ö·ûµÄÎ»ÒÆ¡£
+ 122   3            for(n=0;n<2;n++)    //ÐèÒªÁ½ÐÐÏÔÊ¾£¬·ÖÉÏ°ë²¿·ÖºÍÏÂ°ë²¿·Ö
+ 123   3            {
+ 124   4              Set_Position(page+n,column);
+ 125   4              for(k=0;k<8;k++)
+ 126   4              {
+ 127   5                if(charINV)       
+ 128   5                  Lcd12864_Write_Data(~ASCII8x16[j][k+8*n]);/*ÏÔÊ¾8x16µÄASCII×Öµ½LCDÉÏ£¬yÎªÒ³µØÖ·£¬xÎªÁÐµØÖ·£¬×îºóÎªÊý
+             -¾Ý*/
+ 129   5                else
+ 130   5                  Lcd12864_Write_Data(ASCII8x16[j][k+8*n]);/*ÏÔÊ¾8x16µÄASCII×Öµ½LCDÉÏ£¬yÎªÒ³µØÖ·£¬xÎªÁÐµØÖ·£¬×îºóÎªÊý¾
+             -Ý*/
+ 131   5              }
+ 132   4            }
+ 133   3            column+=8;
+ 134   3          }
+ 135   2        }
+ 136   1      }
+ 137          
+ 138          void Lcd12864ClearPage(unsigned char page,unsigned char len){
+ 139   1        while(len--){
+ 140   2          Lcd12864ShowByte(page,len+1,0x00);
+ 141   2        }
+ 142   1      }
+ 143          
+ 144          
+ 145          void Lcd12864DisplayAsciiString6x8(unsigned char page,unsigned char column,unsigned char * text,unsigned c
+             -har txtlen,unsigned char charINV){
+ 146   1        unsigned char i,j,k;
+ 147   1        Set_Position(page,column);
+ 148   1        for(i=0;i<txtlen;i++)
+ 149   1        {
+ 150   2          if((text[i]>=0x20)&&(text[i]<=0x7b))    /*ASCIIÂë×Ö·û·¶Î§32¡«126¹²95¸ö*/
+ 151   2          {
+ 152   3            j=text[i]-0x20;     //0x20 = 32, 32Îª¿Õ×Ö·û£¬ÊÇ×Ö·û±íµÄµÚÒ»¸ö×Ö·û£¬´ËÐÐ´úÂë¼ÆËã´ýÏÔÊ¾×Ö·û
+ 153   3              for(k=0;k<6;k++)
+ 154   3              {   if(charINV) 
+ 155   4                    Lcd12864_Write_Data(~ASCII6x8[j][k]);
+ 156   4                  else
+ 157   4                    Lcd12864_Write_Data(ASCII6x8[j][k]);/*ÏÔÊ¾8x16µÄASCII×Öµ½LCDÉÏ£¬yÎªÒ³µØÖ·£¬xÎªÁÐµØÖ·£¬×îºóÎªÊý¾Ý*/
+ 158   4              }
+ 159   3          }
+ 160   2        }
+ 161   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    847    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      33
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
